@@ -1,0 +1,722 @@
+[{
+        "name": "JACKET WATER PRESSURE (PUMP DISCHARGE) ",
+        "address": 1000,
+        "type": "decimal"
+    },
+    {
+        "name": "JACKET WATER TEMPERATURE (BANKS EXIT)",
+        "address": 1001,
+        "type": "decimal"
+    },
+    {
+        "name": "LUB OIL PRESSURE (ENGINE INLET)",
+        "address": 1002,
+        "type": "decimal"
+    },
+    {
+        "name": "LUB OIL TEMPERATURE (ENGINE INLET)",
+        "address": 1003,
+        "type": "decimal"
+    },
+    {
+        "name": "OIL SUMP TEMPERATURE",
+        "address": 1004,
+        "type": "decimal"
+    },
+    {
+        "name": "PISTON COOLING OIL PRESSURE (PUMP DISCHARGE)",
+        "address": 1005,
+        "type": "decimal"
+    },
+    {
+        "name": "SEA WATER PRESSURE (PUMP DISCHARGE)",
+        "address": 1006,
+        "type": "decimal"
+    },
+    {
+        "name": "SEA WATER TEMPERATURE (ENGINE COOLER EXIT)",
+        "address": 1007,
+        "type": "decimal"
+    },
+    {
+        "name": "FUEL PRESSURE (AFTER FILTER)",
+        "address": 1008,
+        "type": "decimal"
+    },
+    {
+        "name": "STARTING AIR PRESSURE",
+        "address": 1009,
+        "type": "decimal"
+    },
+    {
+        "name": "CHARGE AIR PRESSURE (RIGHT INTERCOOLER EXIT)",
+        "address": 1010,
+        "type": "decimal"
+    },
+    {
+        "name": "CHARGE AIR PRESSURE (LEFT INTERCOOLER EXIT)",
+        "address": 1011,
+        "type": "decimal"
+    },
+    {
+        "name": "CHARGE AIR TEMPERATURE (RIGHT INTERCOOLER EXIT)",
+        "address": 1012,
+        "type": "decimal"
+    },
+    {
+        "name": "CHARGE AIR TEMPERATURE (LEFT INTERCOOLER EXIT)",
+        "address": 1013,
+        "type": "decimal"
+    },
+    {
+        "name": "EXHAUST TEMP. MANIFOLD A1/2 (LEFT TURBINE INTAKE)",
+        "address": 1014,
+        "type": "decimal"
+    },
+    {
+        "name": "EXHAUST TEMP. MANIFOLD A3/4 (LEFT TURBINE INTAKE)",
+        "address": 1015,
+        "type": "decimal"
+    },
+    {
+        "name": "EXHAUST TEMP. MANIFOLD B1/3 (RIGHT TURBINE INTAKE)",
+        "address": 1016,
+        "type": "decimal"
+    },
+    {
+        "name": "EXHAUST TEMP. MANIFOLD B2/4 (RIGHT TURBINE INTAKE)",
+        "address": 1017,
+        "type": "decimal"
+    },
+    {
+        "name": "EXHAUST GAS TEMPERATURE (TURBINES EXIT)",
+        "address": 1018,
+        "type": "decimal"
+    },
+    {
+        "name": "ENGINE SPEED",
+        "address": 1019,
+        "type": "integer"
+    },
+    {
+        "name": "SEA WATER TEMPERATURE (ALTERNATOR COOLER EXIT)",
+        "address": 1020,
+        "type": "decimal"
+    },
+    {
+        "name": "CHARGE AIR TEMPERATURE (RIGHT INTERCOOLER INTAKE)",
+        "address": 1021,
+        "type": "decimal"
+    },
+    {
+        "name": "CHARGE AIR TEMPERATURE (LEFT INTERCOOLER INTAKE)",
+        "address": 1022,
+        "type": "decimal"
+    },
+    {
+        "name": "SPARE",
+        "address": 1023,
+        "type": "decimal"
+    },
+    {
+        "name": "FUEL TEMPERATURE",
+        "address": 1024,
+        "type": "decimal"
+    },
+    {
+        "name": "PISTON COOLING OIL TEMPERATURE (COOLER OUTLET)",
+        "address": 1025,
+        "type": "decimal"
+    },
+    {
+        "name": "EXHAUST TEMPERATURE CYLINDER A1",
+        "address": 1026,
+        "type": "decimal"
+    },
+    {
+        "name": "EXHAUST TEMPERATURE CYLINDER A2",
+        "address": 1027,
+        "type": "decimal"
+    },
+    {
+        "name": "EXHAUST TEMPERATURE CYLINDER A3",
+        "address": 1028,
+        "type": "decimal"
+    },
+    {
+        "name": "EXHAUST TEMPERATURE CYLINDER A4",
+        "address": 1029,
+        "type": "decimal"
+    },
+    {
+        "name": "EXHAUST TEMPERATURE CYLINDER B1",
+        "address": 1030,
+        "type": "decimal"
+    },
+    {
+        "name": "EXHAUST TEMPERATURE CYLINDER B2",
+        "address": 1031,
+        "type": "decimal"
+    },
+    {
+        "name": "EXHAUST TEMPERATURE CYLINDER B3",
+        "address": 1032,
+        "type": "decimal"
+    },
+    {
+        "name": "EXHAUST TEMPERATURE CYLINDER B4",
+        "address": 1033,
+        "type": "decimal"
+    },
+    {
+        "name": "RAIL PRESSURE",
+        "address": 1034,
+        "type": "decimal"
+    },
+    {
+        "name": "LUB OIL PRESSURE (FILTER INLET)",
+        "address": 1035,
+        "type": "decimal"
+    },
+    {
+        "name": "PISTON COOLING OIL PRESSURE (FILTER INLET)",
+        "address": 1036,
+        "type": "decimal"
+    },
+    {
+        "name": "FUEL PRESSURE (FILTER INLET)",
+        "address": 1037,
+        "type": "decimal"
+    },
+    {
+        "name": "SPARE",
+        "address": 1038,
+        "type": "decimal"
+    },
+    {
+        "name": "SPARE",
+        "address": 1039,
+        "type": "decimal"
+    },
+    {
+        "name": "SOLID TEST IN PROGRESS ACK",
+        "address": 1040,
+        "type": "decimal"
+    },
+    {
+        "name": "SOLID ACTIVE IN ROUTINE PLC ( SOLID OK)",
+        "address": 1041,
+        "type": "bit",
+        "offset": 0
+    },
+    {
+        "name": "EMERGENCY SHUTDOWN ",
+        "address": 1041,
+        "type": "bit",
+        "offset": 1
+    },
+    {
+        "name": "OVERSPEED 1^TH (PLC)",
+        "address": 1041,
+        "type": "bit",
+        "offset": 2
+    },
+    {
+        "name": "OVERSPEED 2^TH (BOSCH)",
+        "address": 1041,
+        "type": "bit",
+        "offset": 3
+    },
+    {
+        "name": "HIGH CHARGE AIR PRESSURE LEFT BANK",
+        "address": 1041,
+        "type": "bit",
+        "offset": 4
+    },
+    {
+        "name": "HIGH CHARGE AIR PRESSURE RIGHT BANK",
+        "address": 1041,
+        "type": "bit",
+        "offset": 5
+    },
+    {
+        "name": "SOLID OK (CONNECTION DONE)",
+        "address": 1041,
+        "type": "bit",
+        "offset": 15
+    },
+    {
+        "name": "DGx NUMBER (1,2,3,4)",
+        "address": 1042,
+        "type": "integer"
+    },
+    {
+        "name": "DGx SERIAL NUMBER (1708_XXXX)",
+        "address": 1043,
+        "type": "integer"
+    },
+    {
+        "name": "DGx HOUR CONTER LOW WORD (LLLL)",
+        "address": 1044,
+        "type": "integer"
+    },
+    {
+        "name": "DGx HOUR CONTER HIGH WORD (HHHH) -->HHHHLLL(32bit)",
+        "address": 1045,
+        "type": "integer"
+    },
+    {
+        "name": "LOW JACKET WATER PRESSURE",
+        "address": 1050,
+        "type": "bit",
+        "offset": 0
+    },
+    {
+        "name": "HIGH JACKET WATER TEMPERATURE",
+        "address": 1050,
+        "type": "bit",
+        "offset": 1
+    },
+    {
+        "name": "LOW LUB OIL PRESSURE",
+        "address": 1050,
+        "type": "bit",
+        "offset": 2
+    },
+    {
+        "name": "HIGH LUB OIL TEMPERATURE",
+        "address": 1050,
+        "type": "bit",
+        "offset": 3
+    },
+    {
+        "name": "LOW SEA WATER PRESSURE",
+        "address": 1050,
+        "type": "bit",
+        "offset": 4
+    },
+    {
+        "name": "HIGH SEA WATER TEMPERATURE",
+        "address": 1050,
+        "type": "bit",
+        "offset": 5
+    },
+    {
+        "name": "LOW FUEL PRESSURE",
+        "address": 1050,
+        "type": "bit",
+        "offset": 6
+    },
+    {
+        "name": "LOW STARTING AIR PRESSURE",
+        "address": 1050,
+        "type": "bit",
+        "offset": 7
+    },
+    {
+        "name": "HIGH EXHAUST TEMPERATURE (TURBINES INTAKE)",
+        "address": 1050,
+        "type": "bit",
+        "offset": 8
+    },
+    {
+        "name": "VERY HIGH EXHAUST TEMPERATURE (TURBINES INTAKE)",
+        "address": 1050,
+        "type": "bit",
+        "offset": 9
+    },
+    {
+        "name": "HIGH EXHAUST TEMPERATURE (TURBINES EXIT)",
+        "address": 1050,
+        "type": "bit",
+        "offset": 10
+    },
+    {
+        "name": "VERY HIGH JACKET WATER TEMPERATURE",
+        "address": 1050,
+        "type": "bit",
+        "offset": 11
+    },
+    {
+        "name": "LOW JACKET WATER LEVEL",
+        "address": 1050,
+        "type": "bit",
+        "offset": 12
+    },
+    {
+        "name": "VERY LOW LUB OIL PRESSURE",
+        "address": 1050,
+        "type": "bit",
+        "offset": 13
+    },
+    {
+        "name": "LOW LUB OIL SUMP LEVEL",
+        "address": 1050,
+        "type": "bit",
+        "offset": 14
+    },
+    {
+        "name": "OVERSPEED",
+        "address": 1050,
+        "type": "bit",
+        "offset": 15
+    },
+    {
+        "name": "HIGH LUBE OIL FILTER DIFFERENTIAL PRESSURE",
+        "address": 1051,
+        "type": "bit",
+        "offset": 0
+    },
+    {
+        "name": "HIGH COOLING OIL FILTER DIFFERENTIAL PRESSURE ",
+        "address": 1051,
+        "type": "bit",
+        "offset": 1
+    },
+    {
+        "name": "HIGH FUEL LEAKAGES LEVEL",
+        "address": 1051,
+        "type": "bit",
+        "offset": 2
+    },
+    {
+        "name": "FUEL/WATER SEPARATOR FILTER CLOGGED",
+        "address": 1051,
+        "type": "bit",
+        "offset": 3
+    },
+    {
+        "name": "HIGH FUEL FILTER DIFFERENTIAL PRESSURE",
+        "address": 1051,
+        "type": "bit",
+        "offset": 4
+    },
+    {
+        "name": "JACKET WATER PREHEATING ON",
+        "address": 1051,
+        "type": "bit",
+        "offset": 5
+    },
+    {
+        "name": "JACKET WATER PREHEATING FAILURE",
+        "address": 1051,
+        "type": "bit",
+        "offset": 6
+    },
+    {
+        "name": "JACKET WATER OVERHEATING ",
+        "address": 1051,
+        "type": "bit",
+        "offset": 7
+    },
+    {
+        "name": "LUB OIL PREHEATING ON",
+        "address": 1051,
+        "type": "bit",
+        "offset": 8
+    },
+    {
+        "name": "LUB OIL PREHEATING FAILURE",
+        "address": 1051,
+        "type": "bit",
+        "offset": 9
+    },
+    {
+        "name": "LUB OIL OVERHEATING",
+        "address": 1051,
+        "type": "bit",
+        "offset": 10
+    },
+    {
+        "name": "PRELUBRICATION ON",
+        "address": 1051,
+        "type": "bit",
+        "offset": 11
+    },
+    {
+        "name": "FUEL RAIL RELIEF VALVE OPEN",
+        "address": 1051,
+        "type": "bit",
+        "offset": 12
+    },
+    {
+        "name": "HIGH SEA WATER TEMPERATURE (ALT. COOLER EXIT)",
+        "address": 1051,
+        "type": "bit",
+        "offset": 13
+    },
+    {
+        "name": "PANEL IN LOCAL MODE",
+        "address": 1051,
+        "type": "bit",
+        "offset": 14
+    },
+    {
+        "name": "PANEL IN REMOTE MODE",
+        "address": 1051,
+        "type": "bit",
+        "offset": 15
+    },
+    {
+        "name": "START MODE - MAN/AUTO",
+        "address": 1052,
+        "type": "bit",
+        "offset": 0
+    },
+    {
+        "name": "EMERGENCIES OFF",
+        "address": 1052,
+        "type": "bit",
+        "offset": 1
+    },
+    {
+        "name": "DEFAULT SPEED - IDLE/RATED",
+        "address": 1052,
+        "type": "bit",
+        "offset": 2
+    },
+    {
+        "name": "EMERGENCY SHUTDOWN",
+        "address": 1052,
+        "type": "bit",
+        "offset": 3
+    },
+    {
+        "name": "FRESH WATER VERY HIGH PRESSURE",
+        "address": 1052,
+        "type": "bit",
+        "offset": 4
+    },
+    {
+        "name": "TURNING BAR ENGAGED",
+        "address": 1052,
+        "type": "bit",
+        "offset": 5
+    },
+    {
+        "name": "START BLOCKED BY SHIP AUTOMATION",
+        "address": 1052,
+        "type": "bit",
+        "offset": 6
+    },
+    {
+        "name": "TACHOMETER RELAY FAILURE",
+        "address": 1052,
+        "type": "bit",
+        "offset": 7
+    },
+    {
+        "name": "ENGINE READY TO START",
+        "address": 1052,
+        "type": "bit",
+        "offset": 8
+    },
+    {
+        "name": "ENGINE RUNNING",
+        "address": 1052,
+        "type": "bit",
+        "offset": 9
+    },
+    {
+        "name": "START FAILED",
+        "address": 1052,
+        "type": "bit",
+        "offset": 10
+    },
+    {
+        "name": "LOAD DISCONNECTION REQUEST",
+        "address": 1052,
+        "type": "bit",
+        "offset": 11
+    },
+    {
+        "name": "MINOR ALARMS SUMMARY",
+        "address": 1052,
+        "type": "bit",
+        "offset": 12
+    },
+    {
+        "name": "PLC FAULT",
+        "address": 1052,
+        "type": "bit",
+        "offset": 13
+    },
+    {
+        "name": "PLC MINOR FAILURE",
+        "address": 1052,
+        "type": "bit",
+        "offset": 14
+    },
+    {
+        "name": "24Vdc POWER ON",
+        "address": 1052,
+        "type": "bit",
+        "offset": 15
+    },
+    {
+        "name": "HIGH CRANKCASE OIL VAPOR PRESSURE",
+        "address": 1053,
+        "type": "bit",
+        "offset": 0
+    },
+    {
+        "name": "LOW COOLING OIL PRESSURE",
+        "address": 1053,
+        "type": "bit",
+        "offset": 1
+    },
+    {
+        "name": "VERY LOW COOLING OIL PRESSURE",
+        "address": 1053,
+        "type": "bit",
+        "offset": 2
+    },
+    {
+        "name": "LOW AIR FLAP AIR PRESSURE",
+        "address": 1053,
+        "type": "bit",
+        "offset": 3
+    },
+    {
+        "name": "FLAP AIR VALVE FAULT",
+        "address": 1053,
+        "type": "bit",
+        "offset": 4
+    },
+    {
+        "name": "FRESH WATER VERY LOW LEVEL",
+        "address": 1053,
+        "type": "bit",
+        "offset": 5
+    },
+    {
+        "name": "HIGH CYLINDER TEMPERATURE (SUMMARY)",
+        "address": 1053,
+        "type": "bit",
+        "offset": 6
+    },
+    {
+        "name": "LOW CYLINDER TEMPERATURE (SUMMARY)",
+        "address": 1053,
+        "type": "bit",
+        "offset": 7
+    },
+    {
+        "name": "HIGH RAIL PRESSURE ",
+        "address": 1053,
+        "type": "bit",
+        "offset": 8
+    },
+    {
+        "name": "VERY HIGH RAIL PRESSURE",
+        "address": 1053,
+        "type": "bit",
+        "offset": 9
+    },
+    {
+        "name": "FUEL LOW TEMPERATURE",
+        "address": 1053,
+        "type": "bit",
+        "offset": 10
+    },
+    {
+        "name": "HIGH COOLING OIL TEMPERATURE ",
+        "address": 1053,
+        "type": "bit",
+        "offset": 11
+    },
+    {
+        "name": "LUB OIL VERY HIGH TEMPERATURE",
+        "address": 1053,
+        "type": "bit",
+        "offset": 12
+    },
+    {
+        "name": "DGxInterwarm_EV_Fail",
+        "address": 1053,
+        "type": "bit",
+        "offset": 13
+    },
+    {
+        "name": "DGxInterwarm_EV_Open_Fail",
+        "address": 1053,
+        "type": "bit",
+        "offset": 14
+    },
+    {
+        "name": "DGxInterwarm_EV_Open_Fail_Air",
+        "address": 1053,
+        "type": "bit",
+        "offset": 15
+    },
+    {
+        "name": "SOLID LIFE COUNTER",
+        "address": 1100,
+        "type": "integer"
+    },
+    {
+        "name": "SOLID TEST SELECTED (NUMBER)",
+        "address": 1101,
+        "type": "integer"
+    },
+    {
+        "name": "SOLID STATUS READY",
+        "address": 1102,
+        "type": "bit",
+        "offset": 0
+    },
+    {
+        "name": "SOLID STATUS BUSY( TEST ACTIVE / IN PROGRESS)",
+        "address": 1102,
+        "type": "bit",
+        "offset": 1
+    },
+    {
+        "name": "SOLID STAUTS 0",
+        "address": 1102,
+        "type": "bit",
+        "offset": 2
+    },
+    {
+        "name": "SOLID STAUTS 1",
+        "address": 1102,
+        "type": "bit",
+        "offset": 3
+    },
+    {
+        "name": "SOLID STAUTS 2",
+        "address": 1102,
+        "type": "bit",
+        "offset": 4
+    },
+    {
+        "name": "SOLID STAUTS 3",
+        "address": 1102,
+        "type": "bit",
+        "offset": 5
+    },
+    {
+        "name": "SOLID ENGINE START REQUEST",
+        "address": 1102,
+        "type": "bit",
+        "offset": 6
+    },
+    {
+        "name": "SOLID ENGINE STOP REQUEST",
+        "address": 1102,
+        "type": "bit",
+        "offset": 7
+    },
+    {
+        "name": "SOLID 2070 BOSCH OVERSPEED REQUEST",
+        "address": 1102,
+        "type": "bit",
+        "offset": 8
+    },
+    {
+        "name": "SOLID INTERWARM SIMULATION",
+        "address": 1102,
+        "type": "bit",
+        "offset": 9
+    }
+]
