@@ -38,25 +38,52 @@ function setSingleBit(input, bitPosition, value) {
     }
 }
 
-let index = 0;
-
 socket.on('connect', function() {
     console.log('Connected to modbus server')
+
+    // Write all the channels to the modbus server every 250ms
     setInterval(function() {
-        let num;
-        if (channels[index].type == 'decimal') {
-            num = randomUint16()
-        } else if (channels[index].type == 'bit') {
-            num = randomUint16()
-        }
-        client.writeSingleRegister(channels[index].address, num).catch(function() {
-            console.error(arguments)
+        // Split channels into two arrays
+        const channels1 = channels.slice(0, channels.length / 2);
+        const channels2 = channels.slice(channels.length / 2, channels.length);
+        const values1 = channels1.map((channel) => {
+            if (channel.type == 'decimal') {
+                return randomUint16()
+            } else if (channel.type == 'bit') {
+                return randomUint16()
+            } else if (channel.type == 'integer') {
+                return randomUint16()
+            }
         })
-        index++;
-        if (index >= channels.length) {
-            index = 0;
-        }
-    }, 100);
+        const values2 = channels2.map((channel) => {
+            if (channel.type == 'decimal') {
+                return randomUint16()
+            } else if (channel.type == 'bit') {
+                return randomUint16()
+            } else if (channel.type == 'integer') {
+                return randomUint16()
+            }
+        })
+        client.writeMultipleRegisters(channels1[0].address, values1).catch((err) => {
+            console.error(err)
+        })
+        client.writeMultipleRegisters(channels2[0].address, values2).catch((err) => {
+            console.error(err)
+        })
+    }, 250);
+
+    // Reading the modbus channels every 500ms
+    setInterval(function() {
+        client.readHoldingRegisters(channels[0].address, channels.length / 2).then((response) => {
+            client.readHoldingRegisters(channels[channels.length / 2].address, channels.length / 2).then((response) => {
+                //console.log(response)
+            }).catch((err) => {
+                console.error(err)
+            })
+        }).catch((err) => {
+            console.error(err)
+        })
+    }, 500);
 })
 
 socket.on('error', console.error)
