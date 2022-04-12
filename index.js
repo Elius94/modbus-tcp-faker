@@ -82,7 +82,7 @@ function parseMessages(response) {
                 }
             }
         } catch (e) {
-            GUI.err(e.message)
+            GUI.error(e.message)
         }
     })
 }
@@ -95,11 +95,11 @@ function writeCommand(command, value) {
         const _val = _obj.type === 'bit' ? setSingleBit(value, _obj.offset, value) : value
         client.writeSingleRegister(_addr, _val, (err, response) => {
             if (err) {
-                GUI.err(err.message)
+                GUI.error(err.message)
             }
         })
     } else {
-        GUI.err(chalk.red('Not connected'))
+        GUI.error(chalk.red('Not connected'))
     }
 }
 
@@ -245,11 +245,11 @@ const updateConsole = async() => {
     }
 
     screen += chalk.bgBlack(`Commands:`) + `\n`;
-    screen += `  ${chalk.bold('space')}   - ${chalk.italic('Start/stop simulator')}\n`;
-    screen += `  ${chalk.bold('p')}      - ${chalk.italic('Start/stop progressive counter')}\n`;
+    screen += `  ${chalk.bold('space')}  - ${chalk.italic('Start/stop simulator')}\n`;
+    screen += `  ${chalk.bold('p')}      - ${chalk.italic('Start/stop progressive counter (PLC isAlive)')}\n`;
     screen += `  ${chalk.bold('r')}      - ${chalk.italic('Start/stop HR reading and parsing')}\n`;
     screen += `  ${chalk.bold('s')}      - ${chalk.italic('Send command value')}\n`;
-    screen += `  ${chalk.bold('q')}       - ${chalk.italic('Quit')}\n`;
+    screen += `  ${chalk.bold('q')}      - ${chalk.italic('Quit')}\n`;
 
     GUI.setHomePage(screen)
 }
