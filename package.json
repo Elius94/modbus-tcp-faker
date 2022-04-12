@@ -2,6 +2,7 @@
     "name": "modbus-tcp-faker",
     "version": "1.0.0",
     "description": "Modbus TCP PLC Simulator",
+    "type": "module",
     "main": "index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
@@ -10,7 +11,10 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
+        "chalk": "^5.0.1",
+        "console-gui-tools": "^1.1.1",
         "jsmodbus": "^4.0.6",
+        "lodash": "^4.17.21",
         "modbus": "^1.1.1"
     }
 }
