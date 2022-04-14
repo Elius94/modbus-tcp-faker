@@ -10,7 +10,6 @@ const GUI = new ConsoleManager({
 })
 
 import _ from 'lodash'
-const { orderBy } = _
 
 import modbus from 'jsmodbus'
 import net from 'net'
@@ -31,6 +30,18 @@ let lastErr = ""
 let selectedChannel = ""
 let typedVal = 0
 
+const glideStorage = {
+    from: 0,
+    to: 0,
+    step: 1,
+    timers: []
+}
+
+let solidOnscreenValues = {
+    'SOLID LIFE COUNTER': 0,
+    'DGx HOUR CONTER LOW WORD (LLLL)': 0,
+}
+
 //Create a TCP Device
 const options = {
     'host': ipAddress,
@@ -41,17 +52,19 @@ const client = new modbus.client.TCP(socket, unitId)
 
 // Read modbus.json file to store the modbus channels
 const modbusChannels = fs.readFileSync('modbus.json');
-const channels = JSON.parse(modbusChannels);
+const channels = _.orderBy(JSON.parse(modbusChannels), 'name', 'asc');
 
 // remove duplicates from an array
 const removeDuplicates = (array) => {
     return array.filter((a, b) => array.indexOf(a) === b)
 }
 let reverseChannels = {}
+let rawChannels = {}
 channels.forEach((c, i) => {
     if (!reverseChannels[c.address]) {
         reverseChannels[c.address] = []
     }
+    rawChannels[c.address] = 0
     reverseChannels[c.address].push(c)
 })
 
@@ -69,15 +82,16 @@ function parseMessages(response) {
             if (reverseChannels[startAddr + i]) {
                 if (reverseChannels[startAddr + i][0].type === 'bit') {
                     reverseChannels[startAddr + i].forEach((c, j) => {
-                        if (c.value !== getSingleBit(r, c.offset)) {
-                            c.value = getSingleBit(r, c.offset)
-                            GUI.log(chalk.yellow(`[${c.name}]`) + `: ${c.value}`)
+                        const v = getSingleBit(rawChannels[startAddr + i], c.offset)
+                        if (rawChannels[startAddr + i] !== v) {
+                            rawChannels[startAddr + i] = setSingleBit(rawChannels[startAddr + i], c.offset, v)
+                            manageMessage(c.name, rawChannels[startAddr + i])
                         }
                     })
                 } else {
-                    if (reverseChannels[startAddr + i][0].value !== r) {
-                        reverseChannels[startAddr + i][0].value = r
-                        GUI.log(chalk.yellow(`[${reverseChannels[startAddr + i][0].name}]`) + `: ${reverseChannels[startAddr + i][0].value}`)
+                    if (rawChannels[startAddr + i] !== r) {
+                        rawChannels[startAddr + i] = r
+                        manageMessage(reverseChannels[startAddr + i][0].name, rawChannels[startAddr + i])
                     }
                 }
             }
@@ -87,17 +101,48 @@ function parseMessages(response) {
     })
 }
 
+function manageMessage(channel, value) {
+    switch (channel) {
+        case 'SOLID LIFE COUNTER':
+            solidOnscreenValues[channel] = value
+            drawGui()
+            break
+        case 'DGx HOUR CONTER LOW WORD (LLLL)':
+            solidOnscreenValues[channel] = value
+            drawGui()
+            break
+        default:
+            GUI.log(chalk.yellow(`[${channel}]`) + `: ${value}`)
+            break
+    }
+}
+
 function writeCommand(command, value) {
     if (connected) {
         GUI.log(chalk.yellow(`[${command}]`) + `: ${value}`)
         const _obj = channels.find((e) => e.name === command)
         const _addr = _obj.address
-        const _val = _obj.type === 'bit' ? setSingleBit(value, _obj.offset, value) : value
-        client.writeSingleRegister(_addr, _val, (err, response) => {
-            if (err) {
+        if (_obj.type === 'bit') {
+            let currentValue = rawChannels[_obj.address]
+            const _val = setSingleBit(currentValue, _obj.offset, value)
+            currentValue = _val
+            client.writeSingleRegister(_addr, _val, (err, response) => {
+                if (err) {
+                    GUI.error(err.message)
+                }
+            }).catch((err) => {
                 GUI.error(err.message)
-            }
-        })
+            })
+        } else {
+            rawChannels[_obj.address] = value
+            client.writeSingleRegister(_addr, value, (err, response) => {
+                if (err) {
+                    GUI.error(err.message)
+                }
+            }).catch((err) => {
+                GUI.error(err.message)
+            })
+        }
     } else {
         GUI.error(chalk.red('Not connected'))
     }
@@ -125,83 +170,121 @@ function getSingleBit(input, bitPosition) {
     return (input >> bitPosition) & 1;
 }
 
-socket.on('connect', function() {
-    GUI.info('Connected to modbus server')
-    connected = true
-    drawGui()
-
-    // Write all the channels to the modbus server every 250ms
-    setInterval(function() {
-        if (run) {
-            // Split channels into two arrays
-            const channels1 = channels.slice(0, channels.length / 2);
-            const channels2 = channels.slice(channels.length / 2, channels.length);
-            const values1 = channels1.map((channel) => {
-                if (echoChannelAddress) {
-                    return channel.address;
-                } else {
-                    if (channel.type == 'decimal') {
-                        return randomUint16()
-                    } else if (channel.type == 'bit') {
-                        return randomUint16()
-                    } else if (channel.type == 'integer') {
-                        return randomUint16()
-                    }
-                }
-            })
-            const values2 = channels2.map((channel) => {
-                if (echoChannelAddress) {
-                    return channel.address;
-                } else {
-                    if (channel.type == 'decimal') {
-                        return randomUint16()
-                    } else if (channel.type == 'bit') {
-                        return randomUint16()
-                    } else if (channel.type == 'integer') {
-                        return randomUint16()
-                    }
-                }
-            })
-            client.writeMultipleRegisters(channels1[0].address, values1).catch((err) => {
-                GUI.error(JSON.stringify(err))
-            }).then(v => {
-                hrCounter++
-            })
-            client.writeMultipleRegisters(channels2[0].address, values2).catch((err) => {
-                GUI.error(JSON.stringify(err))
-            }).then(v => {
-                hrCounter++
-                drawGui()
-            })
+function glideToValue(value, target, step) {
+    if (value < target) {
+        value += step
+        if (value > target) {
+            value = target
         }
-    }, 250);
+    } else if (value > target) {
+        value -= step
+        if (value < target) {
+            value = target
+        }
+    }
+    return value
+}
 
-    // Reading the modbus channels every 500ms
-    setInterval(function() {
-        if (runRead) {
-            client.readHoldingRegisters(startAddr, size).then((r) => {
-                if (r.response.body.values)
-                    parseMessages(r.response.body.values)
+function glide(chan, from, to, step) {
+    return setInterval(() => {
+        const _ch = channels.find((e) => e.name === chan)
+        if (connected && _ch.type !== 'bit') {
+            rawChannels[_ch.address] = glideToValue(rawChannels[_ch.address], to, step)
+            client.writeSingleRegister(_ch.address, rawChannels[_ch.address], (err, response) => {
+                if (err) {
+                    GUI.error(err.message)
+                }
             }).catch((err) => {
-                GUI.error(JSON.stringify(err))
+                GUI.error(err.message)
             })
         }
-    }, 500);
+    }, 100)
+}
 
-    // Progressive from PLC
-    setInterval(function() {
-        if (runProgressive) {
-            client.writeSingleRegister(1044, prog).catch((err) => {
-                GUI.error(JSON.stringify(err))
-            }).then(v => {
-                prog++
-                hrCounter++
-                drawGui()
-            })
-        }
-    }, 1000);
-
+socket.on('connect', function() {
+    connected = true
+    GUI.info('Connected to modbus server')
+        //drawGui()
 })
+
+socket.on("end", function() {
+    connected = false
+    GUI.error('Disconnected from modbus server')
+        //drawGui()
+})
+
+
+// Write all the channels to the modbus server every 250ms
+setInterval(function() {
+    if (connected && run) {
+        // Split channels into two arrays
+        const channels1 = channels.slice(0, channels.length / 2);
+        const channels2 = channels.slice(channels.length / 2, channels.length);
+        const values1 = channels1.map((channel) => {
+            if (echoChannelAddress) {
+                return channel.address;
+            } else {
+                if (channel.type == 'decimal') {
+                    return randomUint16()
+                } else if (channel.type == 'bit') {
+                    return randomUint16()
+                } else if (channel.type == 'integer') {
+                    return randomUint16()
+                }
+            }
+        })
+        const values2 = channels2.map((channel) => {
+            if (echoChannelAddress) {
+                return channel.address;
+            } else {
+                if (channel.type == 'decimal') {
+                    return randomUint16()
+                } else if (channel.type == 'bit') {
+                    return randomUint16()
+                } else if (channel.type == 'integer') {
+                    return randomUint16()
+                }
+            }
+        })
+        client.writeMultipleRegisters(channels1[0].address, values1).catch((err) => {
+            GUI.error(JSON.stringify(err))
+        }).then(v => {
+            hrCounter++
+        })
+        client.writeMultipleRegisters(channels2[0].address, values2).catch((err) => {
+            GUI.error(JSON.stringify(err))
+        }).then(v => {
+            hrCounter++
+            drawGui()
+        })
+    }
+}, 250);
+
+// Reading the modbus channels every 500ms
+setInterval(function() {
+    if (connected && runRead) {
+        client.readHoldingRegisters(startAddr, size).then((r) => {
+            if (r.response.body.values)
+                parseMessages(r.response.body.values)
+        }).catch((err) => {
+            GUI.error(JSON.stringify(err))
+        })
+    }
+}, 500);
+
+// Progressive from PLC
+setInterval(function() {
+    if (connected && runProgressive) {
+        client.writeSingleRegister(1044, prog).catch((err) => {
+            GUI.error(JSON.stringify(err))
+        }).then(v => {
+            prog++
+            hrCounter++
+            drawGui()
+        })
+    }
+}, 1000);
+
 
 socket.on('error', (err) => { GUI.error(JSON.stringify(err)) })
 socket.connect(options)
@@ -237,6 +320,14 @@ const updateConsole = async() => {
         screen += chalk.green(`HR Reading and parsing is on!  `) + chalk.white(`press 'r' to stop it`) + `\n`
     }
 
+    // Print solid Messages to show in the console (solidOnscreenValues)
+    if (Object.keys(solidOnscreenValues).length > 0) {
+        screen += '\n' + chalk.magenta(`Solid Data: `) + `\n`
+        Object.keys(solidOnscreenValues).forEach((value) => {
+            screen += chalk.white(`${solidOnscreenValues[value]}`) + `\n`
+        })
+    }
+
     // Spacer
     screen += `\n\n`;
 
@@ -249,6 +340,9 @@ const updateConsole = async() => {
     screen += `  ${chalk.bold('p')}      - ${chalk.italic('Start/stop progressive counter (PLC isAlive)')}\n`;
     screen += `  ${chalk.bold('r')}      - ${chalk.italic('Start/stop HR reading and parsing')}\n`;
     screen += `  ${chalk.bold('s')}      - ${chalk.italic('Send command value')}\n`;
+    screen += `  ${chalk.bold('g')}      - ${chalk.italic('Make a glide on channel')}\n`;
+    screen += `  ${chalk.bold('h')}      - ${chalk.italic('Clear all glide actions')}\n`;
+    screen += `  ${chalk.bold('c')}      - ${chalk.italic('Reconnect to server')}\n`;
     screen += `  ${chalk.bold('q')}      - ${chalk.italic('Quit')}\n`;
 
     GUI.setHomePage(screen)
@@ -285,12 +379,47 @@ GUI.on("keypressed", (key) => {
             new OptionPopup("popupSelectCommand", "Select Modbus Channel", channelsNames, selectedChannel).show().on("confirm", (_selectedChannel) => {
                 selectedChannel = _selectedChannel
                 GUI.warn(`Selected: ${selectedChannel}`)
+                const _chan = channels.find(c => c.name == selectedChannel)
+                if (_chan && _chan.type === 'decimal' || _chan.type === 'integer') {
+                    typedVal = rawChannels[_chan.address]
+                } else if (_chan && _chan.type == 'bit') {
+                    typedVal = getSingleBit(rawChannels[_chan.address], _chan.offset)
+                }
                 new InputPopup("popupTypeVal", `Type value for "${selectedChannel}"`, typedVal, true).show().on("confirm", (_val) => {
                     typedVal = _val
                     GUI.warn(`NEW VALUE: ${typedVal}`)
                     writeCommand(selectedChannel, typedVal)
                     drawGui()
                 })
+            })
+            break
+        case 'g':
+            {
+                new OptionPopup("popupSelectCommandGlide", "[Glide] Select Modbus Channel", channelsNames, selectedChannel).show().on("confirm", (_selectedChannel) => {
+                    selectedChannel = _selectedChannel
+                    GUI.warn(`Selected: ${selectedChannel}`)
+                    const _chan = channels.find(c => c.name == selectedChannel)
+                    if (_chan && _chan.type === 'decimal' || _chan.type === 'integer') {
+                        typedVal = rawChannels[_chan.address]
+                    } else if (_chan && _chan.type == 'bit') {
+                        typedVal = getSingleBit(rawChannels[_chan.address], _chan.offset)
+                    }
+                    new InputPopup("popupTypeValFrom", `Type start value for "${selectedChannel}"`, glideStorage.from, true).show().on("confirm", (_val) => {
+                        glideStorage.from = _val
+                        GUI.warn(`FROM: ${glideStorage.from}`)
+                        new InputPopup("popupTypeValTo", `Type target value for "${selectedChannel}"`, glideStorage.to, true).show().on("confirm", (_val) => {
+                            glideStorage.to = _val
+                            GUI.warn(`TO: ${glideStorage.to}`)
+                            glideStorage.timers.push(glide(selectedChannel, glideStorage.from, glideStorage.to, glideStorage.step))
+                            drawGui()
+                        })
+                    })
+                })
+            }
+            break
+        case 'h':
+            glideStorage.timers.forEach(timer => {
+                clearInterval(timer)
             })
             break
         case 'q':
