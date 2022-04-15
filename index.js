@@ -2,7 +2,8 @@
 import chalk from 'chalk';
 chalk.level = 1
 
-import { ConsoleManager, OptionPopup, InputPopup } from 'console-gui-tools'
+//import { ConsoleManager, OptionPopup, InputPopup } from 'console-gui-tools'
+import { ConsoleManager, OptionPopup, InputPopup } from '../console-gui-tools/index.js'
 const GUI = new ConsoleManager({
     title: 'MODBUS PLC SIMULATOR', // Title of the console
     logsPageSize: 50, // Number of lines to show in logs page
@@ -324,7 +325,7 @@ const updateConsole = async() => {
     if (Object.keys(solidOnscreenValues).length > 0) {
         screen += '\n' + chalk.magenta(`Solid Data: `) + `\n`
         Object.keys(solidOnscreenValues).forEach((value) => {
-            screen += chalk.white(`${solidOnscreenValues[value]}`) + `\n`
+            screen += chalk.white(`${value}: ${solidOnscreenValues[value]}`) + `\n`
         })
     }
 
