@@ -1,9 +1,5 @@
-// For colors in the console
-import chalk from 'chalk';
-chalk.level = 1
-
 //import { ConsoleManager, OptionPopup, InputPopup } from 'console-gui-tools'
-import { ConsoleManager, OptionPopup, InputPopup } from '../console-gui-tools/index.js'
+import { ConsoleManager, OptionPopup, InputPopup, PageBuilder, ConfirmPopup } from '../console-gui-tools/src/ConsoleGui.js'
 const GUI = new ConsoleManager({
     title: 'MODBUS PLC SIMULATOR', // Title of the console
     logsPageSize: 50, // Number of lines to show in logs page
@@ -16,7 +12,8 @@ import modbus from 'jsmodbus'
 import net from 'net'
 import fs from 'fs'
 
-const ipAddress = '192.168.0.172';
+//const ipAddress = '192.168.0.172';
+const ipAddress = '10.0.0.20';
 const port = 502;
 const unitId = 1;
 
@@ -113,14 +110,14 @@ function manageMessage(channel, value) {
             drawGui()
             break
         default:
-            GUI.log(chalk.yellow(`[${channel}]`) + `: ${value}`)
+            GUI.log(`[${channel}]: ${value}`)
             break
     }
 }
 
 function writeCommand(command, value) {
     if (connected) {
-        GUI.log(chalk.yellow(`[${command}]`) + `: ${value}`)
+        GUI.log(`[${command}]: ${value}`)
         const _obj = channels.find((e) => e.name === command)
         const _addr = _obj.address
         if (_obj.type === 'bit') {
@@ -145,7 +142,7 @@ function writeCommand(command, value) {
             })
         }
     } else {
-        GUI.error(chalk.red('Not connected'))
+        GUI.error('Not connected')
     }
 }
 
@@ -295,58 +292,62 @@ socket.connect(options)
  *
  */
 const updateConsole = async() => {
-    let screen = ""
-    screen += chalk.yellow(`Modbus TCP server simulator app! Welcome...`) + `\n`
-    if (connected) screen += chalk.green(`Connected to TCP Server: ${ipAddress}:${port} - id: ${unitId}`) + `\n`
-    screen += chalk.magenta(`Holding Register Setted: `) + chalk.white(`${hrCounter}`) + `\n\n`
+    const p = new PageBuilder()
+    p.addRow({ text: `Modbus TCP server simulator app! Welcome...`, color: "yellow" })
+    if (connected) p.addRow({ text: `Connected to TCP Server: ${ipAddress}:${port} - id: ${unitId}`, color: "green" })
+    p.addRow({ text: `Holding Register Setted: `, color: "magenta" }, { text: `${hrCounter}`, color: "white" })
 
     // Print if simulator is running or not
     if (!run) {
-        screen += chalk.red(`Simulator is not running! `) + chalk.white(`press 'space' to start`) + `\n`
+        p.addRow({ text: `Simulator is not running! `, color: "red" }, { text: `press 'space' to start`, color: "white" })
     } else {
-        screen += chalk.green(`Simulator is running! `) + chalk.white(`press 'space' to stop`) + `\n`
+        p.addRow({ text: `Simulator is running! `, color: "green" }, { text: `press 'space' to stop`, color: "white" })
     }
 
     // Print if progressive counter is running or not
     if (!runProgressive) {
-        screen += chalk.red(`Progressive counter [hr1044] is not running! `) + chalk.white(`press 'p' to start it`) + `\n`
+        p.addRow({ text: `Progressive counter [hr1044] is not running! `, color: "red" }, { text: `press 'p' to start it`, color: "white" })
     } else {
-        screen += chalk.green(`Progressive counter [hr1044] is running! `) + chalk.white(`press 'p' to stop it`) + `\n`
+        p.addRow({ text: `Progressive counter [hr1044] is running! `, color: "green" }, { text: `press 'p' to stop it`, color: "white" })
     }
 
     // Print if progressive counter is running or not
     if (!runRead) {
-        screen += chalk.red(`HR Reading and parsing is off! `) + chalk.white(`press 'r' to start it`) + `\n`
+        p.addRow({ text: `HR Reading and parsing is off! `, color: "red" }, { text: `press 'r' to start it`, color: "white" })
     } else {
-        screen += chalk.green(`HR Reading and parsing is on!  `) + chalk.white(`press 'r' to stop it`) + `\n`
+        p.addRow({ text: `HR Reading and parsing is on!  `, color: "green" }, { text: `press 'r' to stop it`, color: "white" })
     }
 
     // Print solid Messages to show in the console (solidOnscreenValues)
+    p.addSpacer()
     if (Object.keys(solidOnscreenValues).length > 0) {
-        screen += '\n' + chalk.magenta(`Solid Data: `) + `\n`
+        p.addRow({ text: `Solid Data: `, color: "magenta" })
         Object.keys(solidOnscreenValues).forEach((value) => {
-            screen += chalk.white(`${value}: ${solidOnscreenValues[value]}`) + `\n`
+            p.addRow({ text: `${value}: ${solidOnscreenValues[value]}`, color: "white" })
         })
     }
 
     // Spacer
-    screen += `\n\n`;
-
+    p.addSpacer(2);
     if (lastErr.length > 0) {
-        screen += lastErr + `\n\n`
+        p.addRow({ text: lastErr, color: "red" })
     }
+    p.addSpacer(2);
 
-    screen += chalk.bgBlack(`Commands:`) + `\n`;
-    screen += `  ${chalk.bold('space')}  - ${chalk.italic('Start/stop simulator')}\n`;
-    screen += `  ${chalk.bold('p')}      - ${chalk.italic('Start/stop progressive counter (PLC isAlive)')}\n`;
-    screen += `  ${chalk.bold('r')}      - ${chalk.italic('Start/stop HR reading and parsing')}\n`;
-    screen += `  ${chalk.bold('s')}      - ${chalk.italic('Send command value')}\n`;
-    screen += `  ${chalk.bold('g')}      - ${chalk.italic('Make a glide on channel')}\n`;
-    screen += `  ${chalk.bold('h')}      - ${chalk.italic('Clear all glide actions')}\n`;
-    screen += `  ${chalk.bold('c')}      - ${chalk.italic('Reconnect to server')}\n`;
-    screen += `  ${chalk.bold('q')}      - ${chalk.italic('Quit')}\n`;
+    // Print the commands
+    p.addRow({ text: `Commands: `, color: "white", bg: "bgBlack" })
+    p.addRow({ text: `  'space'`, color: "white", bold: true }, { text: `  - start/stop the simulator`, color: "gray", italic: true })
+    p.addRow({ text: `  'r'`, color: "white", bold: true }, { text: `  - start/stop the HR reading and parsing`, color: "gray", italic: true })
+    p.addRow({ text: `  'p'`, color: "white", bold: true }, { text: `  - start/stop progressive counter (PLC isAlive)`, color: "gray", italic: true })
+    p.addRow({ text: `  's'`, color: "white", bold: true }, { text: `  - send command value`, color: "gray", italic: true })
+    p.addRow({ text: `  'g'`, color: "white", bold: true }, { text: `  - make a glide on channel`, color: "gray", italic: true })
+    p.addRow({ text: `  'h'`, color: "white", bold: true }, { text: `  - clear all glide actions`, color: "gray", italic: true })
+    p.addRow({ text: `  'c'`, color: "white", bold: true }, { text: `  - ceconnect to server`, color: "gray", italic: true })
+    p.addRow({ text: `  'q'`, color: "white", bold: true }, { text: `  - quit the app`, color: "gray", italic: true })
 
-    GUI.setHomePage(screen)
+    p.addSpacer(2);
+
+    GUI.setHomePage(p)
 }
 
 GUI.on("exit", () => {
@@ -424,7 +425,7 @@ GUI.on("keypressed", (key) => {
             })
             break
         case 'q':
-            closeApp()
+            new ConfirmPopup("popupQuit", "Are you sure you want to quit?").show().on("confirm", () => closeApp())
             break
         default:
             break
