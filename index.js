@@ -1,5 +1,5 @@
-//import { ConsoleManager, OptionPopup, InputPopup } from 'console-gui-tools'
-import { ConsoleManager, OptionPopup, InputPopup, PageBuilder, ConfirmPopup } from '../console-gui-tools/src/ConsoleGui.js'
+import { ConsoleManager, OptionPopup, InputPopup, PageBuilder, ConfirmPopup } from 'console-gui-tools'
+//import { ConsoleManager, OptionPopup, InputPopup, PageBuilder, ConfirmPopup } from '../console-gui-tools/src/ConsoleGui.js'
 const GUI = new ConsoleManager({
     title: 'MODBUS PLC SIMULATOR', // Title of the console
     logsPageSize: 50, // Number of lines to show in logs page
@@ -22,7 +22,7 @@ let hrCounter = 0
 let run = false
 let runProgressive = false
 let runRead = false
-let prog = 0
+let prog = 4
 let lastErr = ""
 
 let selectedChannel = ""
@@ -273,10 +273,9 @@ setInterval(function() {
 // Progressive from PLC
 setInterval(function() {
     if (connected && runProgressive) {
-        client.writeSingleRegister(1044, prog).catch((err) => {
+        client.writeSingleRegister(1042, prog).catch((err) => {
             GUI.error(JSON.stringify(err))
         }).then(v => {
-            prog++
             hrCounter++
             drawGui()
         })
@@ -342,7 +341,7 @@ const updateConsole = async() => {
     p.addRow({ text: `  's'`, color: "white", bold: true }, { text: `  - send command value`, color: "gray", italic: true })
     p.addRow({ text: `  'g'`, color: "white", bold: true }, { text: `  - make a glide on channel`, color: "gray", italic: true })
     p.addRow({ text: `  'h'`, color: "white", bold: true }, { text: `  - clear all glide actions`, color: "gray", italic: true })
-    p.addRow({ text: `  'c'`, color: "white", bold: true }, { text: `  - ceconnect to server`, color: "gray", italic: true })
+    p.addRow({ text: `  'c'`, color: "white", bold: true }, { text: `  - reconnect to server`, color: "gray", italic: true })
     p.addRow({ text: `  'q'`, color: "white", bold: true }, { text: `  - quit the app`, color: "gray", italic: true })
 
     p.addSpacer(2);
