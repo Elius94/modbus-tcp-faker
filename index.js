@@ -5,6 +5,7 @@ import {
   PageBuilder,
   ConfirmPopup,
   Button,
+  Progress,
 } from "console-gui-tools";
 //import { ConsoleManager, OptionPopup, InputPopup, PageBuilder, ConfirmPopup } from '../console-gui-tools/src/ConsoleGui.js'
 const GUI = new ConsoleManager({
@@ -635,6 +636,25 @@ const addButtons = () => {
       0,
       100
     );
+  })
+
+  const p2Style = {
+    background: "bgBlack",
+    borderColor: "yellow",
+    color: "magenta",
+    boxed: true,
+    showTitle: true,
+    showValue: true,
+    showPercentage: true,
+    showMinMax: true,
+  }
+  const p2 = new Progress("prog3", 25, 2, 3, 31, p2Style, "precision", "horizontal", true)
+  p2.setText("Engine Speed")
+  p2.setValue(0)
+  p2.setMin(0)
+  p2.setMax(2000)
+  p2.on("valueChanged", (value) => {
+    writeCommand("ENGINE SPEED", Math.round(value));
   })
 }
 
