@@ -5,15 +5,14 @@ import {
   PageBuilder,
   ConfirmPopup,
   Button,
-  Progress,
 } from "console-gui-tools";
 //import { ConsoleManager, OptionPopup, InputPopup, PageBuilder, ConfirmPopup } from '../console-gui-tools/src/ConsoleGui.js'
 const GUI = new ConsoleManager({
-  title: "MODBUS PLC SIMULATOR", // Title of the console
+  title: "MODBUS PLC SIMULATOR FOR LCS TOOLKIT", // Title of the console
   logPageSize: 20, // Number of lines to show in logs page
-  changeLayoutKey: "ctrl+l", // Change layout with ctrl+l to switch to the logs page
   enableMouse: true,
   layoutOptions: {
+    changeFocusKey: "ctrl+l", // Change focus with ctrl+l
     showTitle: true, // Show title in the top of the console
     type: "double", // Type of layout: single, double, triple
     direction: "horizontal", // Direction of the layout: horizontal, vertical
@@ -22,16 +21,21 @@ const GUI = new ConsoleManager({
   },
 });
 
+import { testNames, tests } from "./lcs.js";
+
 import _ from "lodash";
 
 import modbus from "jsmodbus";
 import net from "net";
-import fs from "fs";
+import fs, { write } from "fs";
 
 const ipAddress = "192.168.0.39";
 //const ipAddress = '127.0.0.1';
 const port = 502;
 const unitId = 1;
+
+let testMode = false;
+let selectedTest = "";
 
 let connected = false;
 let hrCounter = 0;
@@ -43,6 +47,13 @@ let lastErr = "";
 
 let selectedChannel = "";
 let typedVal = 0;
+
+const actionsStartPosition = {
+  x: 0,
+  y: 0,
+}
+
+let actionsButtons = [];
 
 const glideStorage = {
   from: 0,
@@ -99,17 +110,20 @@ function parseMessages(response) {
     try {
       if (reverseChannels[startAddr + i]) {
         if (reverseChannels[startAddr + i][0].type === "bit") {
-          reverseChannels[startAddr + i].forEach((c, j) => {
-            const v = getSingleBit(rawChannels[startAddr + i], c.offset);
-            if (rawChannels[startAddr + i] !== v) {
-              rawChannels[startAddr + i] = setSingleBit(
-                rawChannels[startAddr + i],
-                c.offset,
-                v
-              );
-              manageMessage(c.name, rawChannels[startAddr + i]);
-            }
-          });
+          if (rawChannels[startAddr + i] !== r) {
+            rawChannels[startAddr + i] = r;
+            reverseChannels[startAddr + i].forEach((c, j) => {
+              const v = getSingleBit(rawChannels[startAddr + i], c.offset);
+              if (rawChannels[startAddr + i] !== v) {
+                rawChannels[startAddr + i] = setSingleBit(
+                  rawChannels[startAddr + i],
+                  c.offset,
+                  v
+                );
+                manageMessage(c.name, v);
+              }
+            });
+          }
         } else {
           if (rawChannels[startAddr + i] !== r) {
             rawChannels[startAddr + i] = r;
@@ -127,19 +141,20 @@ function parseMessages(response) {
 }
 
 function manageMessage(channel, value) {
-  switch (channel) {
-    case "SOLID LIFE COUNTER":
-      solidOnscreenValues[channel] = value;
-      drawGui();
-      break;
-    case "DGx HOUR CONTER LOW WORD (LLLL)":
-      solidOnscreenValues[channel] = value;
-      drawGui();
-      break;
-    default:
-      GUI.log(`[${channel}]: ${value}`);
-      break;
+  GUI.log(`[${channel}]: ${value}`);
+  solidOnscreenValues[channel] = value;
+  if (channel === "SOLID TEST SELECTED (NUMBER)") {
+    selectedTest = "";
+    for (let i = 0; i < testNames.length; i++) {
+      if (value === tests[testNames[i]].number) {
+        selectedTest = testNames[i];
+        break;
+      }
+    }
+    GUI.log(`Test selected: ${selectedTest}`);
+    updateButtons(true);
   }
+  drawGui();
 }
 
 function writeCommand(command, value) {
@@ -359,16 +374,27 @@ const updateConsole = async () => {
   );
 
   // Print if simulator is running or not
-  if (!run) {
+  if (testMode) {
     p.addRow(
-      { text: `Simulator is not running! `, color: "red" },
-      { text: `press 'space' to start`, color: "white" }
+      { text: `Test mode is enabled! `, color: "red" },
+      { text: `press 't' to disable it`, color: "white" }
+    );
+    p.addRow(
+      { text: `Selected test: `, color: "magenta" },
+      { text: `${selectedTest} `, color: "white" },
     );
   } else {
-    p.addRow(
-      { text: `Simulator is running! `, color: "green" },
-      { text: `press 'space' to stop`, color: "white" }
-    );
+    if (!run) {
+      p.addRow(
+        { text: `Simulator is not running! `, color: "red" },
+        { text: `press 'space' to start`, color: "white" }
+      );
+    } else {
+      p.addRow(
+        { text: `Simulator is running! `, color: "green" },
+        { text: `press 'space' to stop`, color: "white" }
+      );
+    }
   }
 
   // Print if progressive counter is running or not
@@ -401,11 +427,13 @@ const updateConsole = async () => {
   p.addSpacer();
   if (Object.keys(solidOnscreenValues).length > 0) {
     p.addRow({ text: `Solid Data: `, color: "magenta" });
-    Object.keys(solidOnscreenValues).forEach((value) => {
-      p.addRow({
-        text: `${value}: ${solidOnscreenValues[value]}`,
-        color: "white",
-      });
+    p.addRow({
+      text: `SOLID LIFE COUNTER: ${solidOnscreenValues["SOLID LIFE COUNTER"]}`,
+      color: "white",
+    });
+    p.addRow({
+      text: `DGx HOUR CONTER LOW WORD (LLLL): ${solidOnscreenValues["DGx HOUR CONTER LOW WORD (LLLL)"]}`,
+      color: "white",
     });
   }
 
@@ -414,42 +442,53 @@ const updateConsole = async () => {
   if (lastErr.length > 0) {
     p.addRow({ text: lastErr, color: "red" });
   }
-  p.addSpacer(2);
+  p.addSpacer(1);
 
   // Print the commands
   p.addRow({ text: `Commands: `, color: "white", bg: "bgBlack" });
-  p.addRow(
-    { text: `  'space'`, color: "white", bold: true },
-    { text: `  - start/stop the simulator`, color: "gray", italic: true }
-  );
-  p.addRow(
-    { text: `  'r'`, color: "white", bold: true },
-    {
-      text: `  - start/stop the HR reading and parsing`,
-      color: "gray",
-      italic: true,
-    }
-  );
-  p.addRow(
-    { text: `  'p'`, color: "white", bold: true },
-    {
-      text: `  - start/stop progressive counter (PLC isAlive)`,
-      color: "gray",
-      italic: true,
-    }
-  );
-  p.addRow(
-    { text: `  's'`, color: "white", bold: true },
-    { text: `  - send command value`, color: "gray", italic: true }
-  );
-  p.addRow(
-    { text: `  'g'`, color: "white", bold: true },
-    { text: `  - make a glide on channel`, color: "gray", italic: true }
-  );
-  p.addRow(
-    { text: `  'h'`, color: "white", bold: true },
-    { text: `  - clear all glide actions`, color: "gray", italic: true }
-  );
+  if (testMode) {
+    p.addRow(
+      { text: `  't'`, color: "white", bold: true },
+      { text: `  - disable test mode`, color: "gray", italic: true }
+    );
+  } else {
+    p.addRow(
+      { text: `  't'`, color: "white", bold: true },
+      { text: `  - enable test mode`, color: "gray", italic: true }
+    );
+    p.addRow(
+      { text: `  'space'`, color: "white", bold: true },
+      { text: `  - start/stop the simulator`, color: "gray", italic: true }
+    );
+    p.addRow(
+      { text: `  'r'`, color: "white", bold: true },
+      {
+        text: `  - start/stop the HR reading and parsing`,
+        color: "gray",
+        italic: true,
+      }
+    );
+    p.addRow(
+      { text: `  'p'`, color: "white", bold: true },
+      {
+        text: `  - start/stop progressive counter (PLC isAlive)`,
+        color: "gray",
+        italic: true,
+      }
+    );
+    p.addRow(
+      { text: `  's'`, color: "white", bold: true },
+      { text: `  - send command value`, color: "gray", italic: true }
+    );
+    p.addRow(
+      { text: `  'g'`, color: "white", bold: true },
+      { text: `  - make a glide on channel`, color: "gray", italic: true }
+    );
+    p.addRow(
+      { text: `  'h'`, color: "white", bold: true },
+      { text: `  - clear all glide actions`, color: "gray", italic: true }
+    );
+  }
   p.addRow(
     { text: `  'c'`, color: "white", bold: true },
     { text: `  - reconnect to server`, color: "gray", italic: true }
@@ -461,14 +500,230 @@ const updateConsole = async () => {
 
   p.addSpacer(2);
 
-  GUI.setPage(p, 0);
+
+  if (!testMode) {
+    GUI.setPage(p, 0);
+    // run the test
+    return;
+  }
+
+  const pages = [p, GUI.stdOut];
+
+  // Draw the test watchs and actions
+  const watchPage = new PageBuilder();
+  watchPage.addRow(
+    { text: `Test: ${selectedTest}`, color: "white", bg: "bgBlack" }
+  );
+  watchPage.addSpacer(1);
+  watchPage.addRow(
+    { text: `Watchs: `, color: "white", bg: "bgBlack" }
+  );
+  watchPage.addSpacer(1);
+  tests[selectedTest]?.watchs.forEach((watch) => {
+    watchPage.addRow(
+      { text: `  ${watch.name}: `, color: "white", bg: "bgBlack" },
+      { text: `${solidOnscreenValues[watch.modbus]}`, color: "white", bg: "bgBlack" }
+    );
+  });
+  pages.push(watchPage);
+
+  const actionPage = new PageBuilder();
+  actionPage.addRow(
+    { text: `Test: ${selectedTest}`, color: "white", bg: "bgBlack" }
+  );
+  actionPage.addSpacer(1);
+  actionPage.addRow(
+    { text: `Actions: `, color: "white", bg: "bgBlack" }
+  );
+  actionPage.addSpacer(1);
+
+  actionsStartPosition.x = GUI.layout.layout.realWidth[1][0] + (GUI.getLayoutOptions().boxed ? 2 : 0);
+  actionsStartPosition.y = Math.max(p.getViewedPageHeight(), GUI.stdOut.getViewedPageHeight()) + (GUI.getLayoutOptions().boxed ? 2 : 0) + actionPage.getViewedPageHeight() + 1;
+  updateButtons();
+
+  pages.push(actionPage);
+
+  GUI.setPages(pages, [GUI.applicationTitle, "LOGS", "WATCHS", "ACTIONS"]);
 };
+
+const updateButtons = (define = false) => {
+  const actions = tests[selectedTest]?.actions || [];
+  if (define) {
+    actionsButtons = actions.map((action, index) => {
+      const title = `${action.name} [Ctrl+${action.key}]`
+      const button = new Button(
+        `action_${index}`,
+        title,
+        title.length + 2,
+        3,
+        actionsStartPosition.x,
+        actionsStartPosition.y + (index * 3),
+        {
+          color: action.color,
+          borderColor: action.color,
+        },
+        {
+          name: action.key,
+          ctrl: true,
+        },
+        () => {}, // onClick callback
+        () => {}, // onRelease callback
+        true,
+        true,
+        false
+      );
+      button.on("click", () => {
+        writeCommand(action.modbus, action.value);
+      });
+      return button;
+    });
+  } else {
+    actionsButtons.forEach((button, index) => {
+      button.absoluteValues.x = actionsStartPosition.x;
+      button.absoluteValues.y = actionsStartPosition.y + (index * 3);
+    });
+  }
+}
 
 GUI.on("exit", () => {
   closeApp();
 });
 
+GUI.on("layoutratiochanged", () => {
+  updateButtons();
+});
+
 GUI.on("keypressed", (key) => {
+  if (testMode) {
+    if (!key.ctrl && key.name === "t") {
+      testMode = false;
+      runProgressive = false;
+      run = false;
+      runRead = false;
+      GUI.setLayoutOptions({ ...GUI.getLayoutOptions(), type: "double" });
+      GUI.warn(`Test mode disabled!`);
+      drawGui();
+    }
+  } else {
+    switch (key.name) {
+      case "t":
+        testMode = true;
+        runProgressive = true;
+        run = false;
+        runRead = true;
+        GUI.setLayoutOptions({ ...GUI.getLayoutOptions(), type: "quad" });
+        Object.keys(glideStorage.timers).forEach((timer) => {
+          clearInterval(glideStorage.timers[timer]);
+        });
+        GUI.warn(`Test mode enabled!`);
+        drawGui();
+        break;
+      case "space":
+        run = !run;
+        drawGui();
+        break;
+      case "p":
+        runProgressive = !runProgressive;
+        drawGui();
+        break;
+      case "r":
+        runRead = !runRead;
+        drawGui();
+        break;
+      case "s":
+        new OptionPopup(
+          "popupSelectCommand",
+          "Select Modbus Channel",
+          channelsNames,
+          selectedChannel
+        )
+          .show()
+          .on("confirm", (_selectedChannel) => {
+            selectedChannel = _selectedChannel;
+            GUI.warn(`Selected: ${selectedChannel}`);
+            const _chan = channels.find((c) => c.name == selectedChannel);
+            if ((_chan && _chan.type === "decimal") || _chan.type === "integer") {
+              typedVal = rawChannels[_chan.address];
+            } else if (_chan && _chan.type == "bit") {
+              typedVal = getSingleBit(rawChannels[_chan.address], _chan.offset);
+            }
+            new InputPopup(
+              "popupTypeVal",
+              `Type value for "${selectedChannel}"`,
+              typedVal,
+              true
+            )
+              .show()
+              .on("confirm", (_val) => {
+                typedVal = _val;
+                GUI.warn(`NEW VALUE: ${typedVal}`);
+                writeCommand(selectedChannel, typedVal);
+                drawGui();
+              });
+          });
+        break;
+      case "g":
+        {
+          new OptionPopup(
+            "popupSelectCommandGlide",
+            "[Glide] Select Modbus Channel",
+            channelsNames,
+            selectedChannel
+          )
+            .show()
+            .on("confirm", (_selectedChannel) => {
+              selectedChannel = _selectedChannel;
+              GUI.warn(`Selected: ${selectedChannel}`);
+              const _chan = channels.find((c) => c.name == selectedChannel);
+              if (
+                (_chan && _chan.type === "decimal") ||
+                _chan.type === "integer"
+              ) {
+                typedVal = rawChannels[_chan.address];
+              } else if (_chan && _chan.type == "bit") {
+                typedVal = getSingleBit(rawChannels[_chan.address], _chan.offset);
+              }
+              new InputPopup(
+                "popupTypeValFrom",
+                `Type start value for "${selectedChannel}"`,
+                glideStorage.from,
+                true
+              )
+                .show()
+                .on("confirm", (_val) => {
+                  glideStorage.from = _val;
+                  GUI.warn(`FROM: ${glideStorage.from}`);
+                  new InputPopup(
+                    "popupTypeValTo",
+                    `Type target value for "${selectedChannel}"`,
+                    glideStorage.to,
+                    true
+                  )
+                    .show()
+                    .on("confirm", (_val) => {
+                      glideStorage.to = _val;
+                      GUI.warn(`TO: ${glideStorage.to}`);
+                      glideStorage.timers[selectedChannel] = glide(
+                        selectedChannel,
+                        glideStorage.from,
+                        glideStorage.to,
+                        glideStorage.step
+                      );
+                      drawGui();
+                    });
+                });
+            });
+        }
+        break;
+      case "h":
+        Object.keys(glideStorage.timers).forEach((timer) => {
+          clearInterval(glideStorage.timers[timer]);
+        });
+        break;
+      default:
+        break;
+    }
+  }
   switch (key.name) {
     case "c":
       {
@@ -478,108 +733,6 @@ GUI.on("keypressed", (key) => {
         }
         socket.connect(options);
       }
-      break;
-    case "space":
-      run = !run;
-      drawGui();
-      break;
-    case "p":
-      runProgressive = !runProgressive;
-      drawGui();
-      break;
-    case "r":
-      runRead = !runRead;
-      drawGui();
-      break;
-    case "s":
-      new OptionPopup(
-        "popupSelectCommand",
-        "Select Modbus Channel",
-        channelsNames,
-        selectedChannel
-      )
-        .show()
-        .on("confirm", (_selectedChannel) => {
-          selectedChannel = _selectedChannel;
-          GUI.warn(`Selected: ${selectedChannel}`);
-          const _chan = channels.find((c) => c.name == selectedChannel);
-          if ((_chan && _chan.type === "decimal") || _chan.type === "integer") {
-            typedVal = rawChannels[_chan.address];
-          } else if (_chan && _chan.type == "bit") {
-            typedVal = getSingleBit(rawChannels[_chan.address], _chan.offset);
-          }
-          new InputPopup(
-            "popupTypeVal",
-            `Type value for "${selectedChannel}"`,
-            typedVal,
-            true
-          )
-            .show()
-            .on("confirm", (_val) => {
-              typedVal = _val;
-              GUI.warn(`NEW VALUE: ${typedVal}`);
-              writeCommand(selectedChannel, typedVal);
-              drawGui();
-            });
-        });
-      break;
-    case "g":
-      {
-        new OptionPopup(
-          "popupSelectCommandGlide",
-          "[Glide] Select Modbus Channel",
-          channelsNames,
-          selectedChannel
-        )
-          .show()
-          .on("confirm", (_selectedChannel) => {
-            selectedChannel = _selectedChannel;
-            GUI.warn(`Selected: ${selectedChannel}`);
-            const _chan = channels.find((c) => c.name == selectedChannel);
-            if (
-              (_chan && _chan.type === "decimal") ||
-              _chan.type === "integer"
-            ) {
-              typedVal = rawChannels[_chan.address];
-            } else if (_chan && _chan.type == "bit") {
-              typedVal = getSingleBit(rawChannels[_chan.address], _chan.offset);
-            }
-            new InputPopup(
-              "popupTypeValFrom",
-              `Type start value for "${selectedChannel}"`,
-              glideStorage.from,
-              true
-            )
-              .show()
-              .on("confirm", (_val) => {
-                glideStorage.from = _val;
-                GUI.warn(`FROM: ${glideStorage.from}`);
-                new InputPopup(
-                  "popupTypeValTo",
-                  `Type target value for "${selectedChannel}"`,
-                  glideStorage.to,
-                  true
-                )
-                  .show()
-                  .on("confirm", (_val) => {
-                    glideStorage.to = _val;
-                    GUI.warn(`TO: ${glideStorage.to}`);
-                    glideStorage.timers[selectedChannel] = glide(
-                      selectedChannel,
-                      glideStorage.from,
-                      glideStorage.to,
-                      glideStorage.step
-                    );
-                    drawGui();
-                  });
-              });
-          });
-      }
-      break;
-    case "h":
-      Object.keys(glideStorage.timers).forEach((timer) => {
-        clearInterval(glideStorage.timers[timer]);
-      });
       break;
     case "q":
       new ConfirmPopup("popupQuit", "Are you sure you want to quit?")
@@ -591,72 +744,6 @@ GUI.on("keypressed", (key) => {
   }
 });
 
-const addButtons = () => {
-  const btnSimStartProps = {
-    text: "Simulate Engine Start",
-    style: {
-      color: "magentaBright",
-      borderColor: "magentaBright",
-      bold: true,
-    },
-  }
-  const btnSimStart = new Button("btnSimStart", btnSimStartProps.text, btnSimStartProps.text.length + 4, 3, 3, 11, btnSimStartProps.style)
-  btnSimStart.on("click", () => {
-    console.warn("Engine Started");
-    if (Object.keys(glideStorage.timers).includes("ENGINE SPEED")) {
-      clearInterval(glideStorage.timers["ENGINE SPEED"]);
-      delete glideStorage.timers["ENGINE SPEED"];
-    }
-    glideStorage.timers["ENGINE SPEED"] = glide(
-      "ENGINE SPEED",
-      100,
-      1800,
-      10
-    );
-  })
-
-  const btnSimStopProps = {
-    text: "Simulate Engine Stop",
-    style: {
-      color: "redBright",
-      borderColor: "redBright",
-      bold: true,
-    },
-  }
-  const btnSimStop = new Button("btnSimStop", btnSimStopProps.text, btnSimStopProps.text.length + 4, 3, 4 + btnSimStart.absoluteValues.width, 11, btnSimStopProps.style)
-  btnSimStop.on("click", () => {
-    console.error("Engine Stopped");
-    if (Object.keys(glideStorage.timers).includes("ENGINE SPEED")) {
-      clearInterval(glideStorage.timers["ENGINE SPEED"]);
-      delete glideStorage.timers["ENGINE SPEED"];
-    }
-    glideStorage.timers["ENGINE SPEED"] = glide(
-      "ENGINE SPEED",
-      1800,
-      0,
-      100
-    );
-  })
-
-  const p2Style = {
-    background: "bgBlack",
-    borderColor: "yellow",
-    color: "magenta",
-    boxed: true,
-    showTitle: true,
-    showValue: true,
-    showPercentage: true,
-    showMinMax: true,
-  }
-  const p2 = new Progress("prog3", 25, 2, 3, 31, p2Style, "precision", "horizontal", true)
-  p2.setText("Engine Speed")
-  p2.setValue(0)
-  p2.setMin(0)
-  p2.setMax(2000)
-  p2.on("valueChanged", (value) => {
-    writeCommand("ENGINE SPEED", Math.round(value));
-  })
-}
 
 const drawGui = () => {
   updateConsole();
@@ -668,5 +755,4 @@ const closeApp = () => {
 };
 
 drawGui();
-addButtons();
 
