@@ -1,7 +1,7 @@
 {
     "name": "modbus-tcp-faker",
-    "version": "1.0.0",
-    "description": "Modbus TCP PLC Simulator",
+    "version": "2.0.0",
+    "description": "Modbus TCP PLC Simulator - LCS Unit",
     "type": "module",
     "main": "index.js",
     "scripts": {
@@ -11,8 +11,8 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "chalk": "^5.0.1",
-        "console-gui-tools": "^1.4.0",
+        "chalk": "^5.2.0",
+        "console-gui-tools": "^2.4.2",
         "jsmodbus": "^4.0.6",
         "lodash": "^4.17.21",
         "modbus": "^1.1.1"
