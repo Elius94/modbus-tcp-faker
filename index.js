@@ -10,7 +10,7 @@ import {
 //import { ConsoleManager, OptionPopup, InputPopup, PageBuilder, ConfirmPopup } from '../console-gui-tools/src/ConsoleGui.js'
 const GUI = new ConsoleManager({
   title: "MODBUS PLC SIMULATOR", // Title of the console
-  logPageSize: 50, // Number of lines to show in logs page
+  logPageSize: 20, // Number of lines to show in logs page
   changeLayoutKey: "ctrl+l", // Change layout with ctrl+l to switch to the logs page
   enableMouse: true,
   layoutOptions: {
