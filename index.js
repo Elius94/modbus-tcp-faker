@@ -153,6 +153,7 @@ function manageMessage(channel, value) {
       }
     }
     GUI.log(`Test selected: ${selectedTest}`);
+    deleteButtons();
     updateButtons(true);
   }
   drawGui();
@@ -528,7 +529,7 @@ const updateConsole = async () => {
   });
   pages.push(watchPage);
 
-  const actionPage = new PageBuilder();
+  const actionPage = new PageBuilder(35);
   actionPage.addRow(
     { text: `Test: ${selectedTest}`, color: "white", bg: "bgBlack" }
   );
@@ -536,10 +537,10 @@ const updateConsole = async () => {
   actionPage.addRow(
     { text: `Actions: `, color: "white", bg: "bgBlack" }
   );
-  actionPage.addSpacer(1);
-
+  
   actionsStartPosition.x = GUI.layout.layout.realWidth[1][0] + (GUI.getLayoutOptions().boxed ? 2 : 0);
-  actionsStartPosition.y = Math.max(p.getViewedPageHeight(), GUI.stdOut.getViewedPageHeight()) + (GUI.getLayoutOptions().boxed ? 2 : 0) + actionPage.getViewedPageHeight() - 1;
+  actionsStartPosition.y = Math.max(p.getViewedPageHeight(), GUI.stdOut.getViewedPageHeight()) + (GUI.getLayoutOptions().boxed ? 2 : 0) + actionPage.getViewedPageHeight() + 1;
+  actionPage.addSpacer(18);
   updateButtons();
 
   pages.push(actionPage);
@@ -585,17 +586,24 @@ const defineDefaultButton = () => {
 }
 
 const deleteButtons = () => {
-  defaultButton.delete();
-  //defaultButton = undefined;
+  if (defaultButton) {
+    defaultButton.hide()
+    defaultButton.delete();
+    defaultButton.removeAllListeners();
+    //defaultButton = undefined;
+  }
   actionsButtons.forEach((button) => {
+    button.hide()
     button.delete();
+    button.removeAllListeners();
   });
-  actionsButtons = [];
+  //actionsButtons = [];
 };
 
 const updateButtons = (define = false) => {
   const actions = tests[selectedTest]?.actions || [];
   if (define) {
+    defineDefaultButton();
     actionsButtons = actions.map((action, index) => {
       const title = `${action.name} [Ctrl+${action.key}]`
       const button = new Button(
@@ -664,7 +672,7 @@ GUI.on("keypressed", (key) => {
         Object.keys(glideStorage.timers).forEach((timer) => {
           clearInterval(glideStorage.timers[timer]);
         });
-        defineDefaultButton();
+        deleteButtons();
         updateButtons(true);
         GUI.warn(`Test mode enabled!`);
         drawGui();

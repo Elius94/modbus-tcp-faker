@@ -70,9 +70,9 @@ const tests = {
         actions: [
             startEngine,
             {
-                name: "Set 'FUEL PRESSURE (AFTER FILTER)' to 2000",
+                name: "Set 'FUEL PRESSURE (AFTER FILTER)' to 2.5",
                 modbus: "FUEL PRESSURE (AFTER FILTER)",
-                value: 2000,
+                value: 25,
                 color: "yellow",
                 key: "s"
             },
@@ -94,9 +94,9 @@ const tests = {
         actions: [
             startEngine,
             {
-                name: "Set 'LUB OIL PRESSURE (ENGINE INLET)' to 2000",
+                name: "Set 'LUB OIL PRESSURE (ENGINE INLET)' to 2.0",
                 modbus: "LUB OIL PRESSURE (ENGINE INLET)",
-                value: 2000,
+                value: 20,
                 color: "yellow",
                 key: "s"
             },
@@ -118,9 +118,9 @@ const tests = {
         actions: [
             startEngine,
             {
-                name: "Set 'SEA WATER PRESSURE (PUMP DISCHARGE)' to 2000",
+                name: "Set 'SEA WATER PRESSURE (PUMP DISCHARGE)' to 2.0",
                 modbus: "SEA WATER PRESSURE (PUMP DISCHARGE)",
-                value: 2000,
+                value: 20,
                 color: "yellow",
                 key: "s"
             },
@@ -166,9 +166,9 @@ const tests = {
         actions: [
             startEngine,
             {
-                name: "Set 'CHARGE AIR PRESSURE (LEFT INTERCOOLER EXIT)' to 1600",
+                name: "Set 'CHARGE AIR PRESSURE (LEFT INTERCOOLER EXIT)' to 8.5",
                 modbus: "CHARGE AIR PRESSURE (LEFT INTERCOOLER EXIT)",
-                value: 1600,
+                value: 85,
                 color: "yellow",
                 key: "s"
             },
@@ -180,9 +180,9 @@ const tests = {
                 key: "d"
             },
             {
-                name: "Set 'CHARGE AIR PRESSURE (RIGHT INTERCOOLER EXIT)' to 1600",
+                name: "Set 'CHARGE AIR PRESSURE (RIGHT INTERCOOLER EXIT)' to 8.5",
                 modbus: "CHARGE AIR PRESSURE (RIGHT INTERCOOLER EXIT)",
-                value: 1600,
+                value: 85,
                 color: "yellow",
                 key: "s"
             },
@@ -204,9 +204,9 @@ const tests = {
         actions: [
             startEngine,
             {
-                name: "Set 'PISTON COOLING OIL PRESSURE (FILTER INLET)' to 1700",
+                name: "Set 'PISTON COOLING OIL PRESSURE (FILTER INLET)' to 1.7",
                 modbus: "PISTON COOLING OIL PRESSURE (FILTER INLET)",
-                value: 1700,
+                value: 17,
                 color: "yellow",
                 key: "s"
             },
@@ -249,9 +249,9 @@ const tests = {
         actions: [
             startEngine,
             {
-                name: "Set 'JACKET WATER PRESSURE (PUMP DISCHARGE) ' to 1700",
+                name: "Set 'JACKET WATER PRESSURE (PUMP DISCHARGE) ' to 8.6",
                 modbus: "JACKET WATER PRESSURE (PUMP DISCHARGE) ",
-                value: 1700,
+                value: 86,
                 color: "yellow",
                 key: "s"
             },
@@ -292,9 +292,9 @@ const tests = {
         ],
         actions: [
             {
-                name: "Set 'RAIL PRESSURE' to 1000",
+                name: "Set 'RAIL PRESSURE' to 8.5",
                 modbus: "RAIL PRESSURE",
-                value: 1000,
+                value: 85,
                 color: "yellow",
                 key: "a"
             },
@@ -330,9 +330,9 @@ const tests = {
         actions: [
             startEngine,
             {
-                name: "Set 'LUB OIL PRESSURE (ENGINE INLET)' to 1700",
+                name: "Set 'LUB OIL PRESSURE (ENGINE INLET)' to 1.7",
                 modbus: "LUB OIL PRESSURE (ENGINE INLET)",
-                value: 1700,
+                value: 17,
                 color: "yellow",
                 key: "s"
             },
@@ -368,9 +368,9 @@ const tests = {
         actions: [
             startEngine,
             {
-                name: "Set 'LUB OIL TEMPERATURE (ENGINE INLET)' to 100",
+                name: "Set 'LUB OIL TEMPERATURE (ENGINE INLET)' to 120",
                 modbus: "LUB OIL TEMPERATURE (ENGINE INLET)",
-                value: 100,
+                value: 1200,
                 color: "yellow",
                 key: "s"
             },
@@ -462,16 +462,16 @@ const tests = {
         actions: [
             startEngine,
             {
-                name: "Set 'EXHAUST TEMP. MANIFOLD A1/2 (LEFT TURBINE INTAKE)' to 100",
+                name: "Set 'EXHAUST TEMP. MANIFOLD A1/2 (LEFT TURBINE INTAKE)' to 120",
                 modbus: "EXHAUST TEMP. MANIFOLD A1/2 (LEFT TURBINE INTAKE)",
-                value: 100,
+                value: 1200,
                 color: "green",
                 key: "s"
             },
             {
-                name: "Set 'EXHAUST TEMP. MANIFOLD A3/4 (LEFT TURBINE INTAKE)' to 100",
+                name: "Set 'EXHAUST TEMP. MANIFOLD A3/4 (LEFT TURBINE INTAKE)' to 120",
                 modbus: "EXHAUST TEMP. MANIFOLD A3/4 (LEFT TURBINE INTAKE)",
-                value: 100,
+                value: 1200,
                 color: "green",
                 key: "d"
             },
@@ -507,16 +507,16 @@ const tests = {
         actions: [
             startEngine,
             {
-                name: "Set 'EXHAUST TEMP. MANIFOLD B1/3 (RIGHT TURBINE INTAKE)' to 100",
+                name: "Set 'EXHAUST TEMP. MANIFOLD B1/3 (RIGHT TURBINE INTAKE)' to 120",
                 modbus: "EXHAUST TEMP. MANIFOLD B1/3 (RIGHT TURBINE INTAKE)",
-                value: 100,
+                value: 1200,
                 color: "green",
                 key: "s"
             },
             {
-                name: "Set 'EXHAUST TEMP. MANIFOLD B2/4 (RIGHT TURBINE INTAKE)' to 100",
+                name: "Set 'EXHAUST TEMP. MANIFOLD B2/4 (RIGHT TURBINE INTAKE)' to 120",
                 modbus: "EXHAUST TEMP. MANIFOLD B2/4 (RIGHT TURBINE INTAKE)",
-                value: 100,
+                value: 1200,
                 color: "green",
                 key: "d"
             },
