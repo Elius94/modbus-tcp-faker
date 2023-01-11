@@ -1,12 +1,14 @@
 {
     "name": "modbus-tcp-faker",
-    "version": "3.0.0",
+    "version": "3.1.0",
     "description": "Modbus TCP PLC Simulator - LCS Unit",
     "type": "module",
     "main": "index.js",
+    "bin": "index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "start": "node index.js"
+        "start": "bash -ic 'node index.js'",
+        "build": "pkg --debug index.js --targets node16-linux-x64,node16-win-x64 --output dist/modbus-tcp-faker"
     },
     "author": "",
     "license": "ISC",
