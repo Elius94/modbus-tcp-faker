@@ -1,11 +1,11 @@
-import {
+const {
   ConsoleManager,
   OptionPopup,
   InputPopup,
   PageBuilder,
   ConfirmPopup,
   Button,
-} from "console-gui-tools";
+} = require("console-gui-tools");
 //import { ConsoleManager, OptionPopup, InputPopup, PageBuilder, ConfirmPopup } from '../console-gui-tools/src/ConsoleGui.js'
 const GUI = new ConsoleManager({
   title: "MODBUS PLC SIMULATOR FOR LCS TOOLKIT", // Title of the console
@@ -21,13 +21,13 @@ const GUI = new ConsoleManager({
   },
 });
 
-import { testNames, tests } from "./lcs.js";
+const { testNames, tests } = require("./lcs.js");
 
-import _ from "lodash";
+const _ = require("lodash");
 
-import modbus from "jsmodbus";
-import net from "net";
-import fs, { write } from "fs";
+const modbus = require("jsmodbus");
+const net = require("net");
+const fs = require("fs");
 
 const ipAddress = "192.168.0.39";
 //const ipAddress = '127.0.0.1';

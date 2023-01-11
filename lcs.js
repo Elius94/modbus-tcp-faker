@@ -28,7 +28,7 @@ const startEngine = {
     key: "a"
 }
 
-export const tests = {
+const tests = {
     "High Crankcase Pressure Alarm": {
         number: 101,
         watchs: [
@@ -704,4 +704,9 @@ export const tests = {
     },
 };
 
-export const testNames = Object.keys(tests);
+const testNames = Object.keys(tests);
+
+module.exports = {
+    tests,
+    testNames,
+};
