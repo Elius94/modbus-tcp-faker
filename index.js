@@ -54,6 +54,7 @@ const actionsStartPosition = {
 }
 
 let actionsButtons = [];
+let defaultButton = undefined;
 
 const glideStorage = {
   from: 0,
@@ -538,12 +539,58 @@ const updateConsole = async () => {
   actionPage.addSpacer(1);
 
   actionsStartPosition.x = GUI.layout.layout.realWidth[1][0] + (GUI.getLayoutOptions().boxed ? 2 : 0);
-  actionsStartPosition.y = Math.max(p.getViewedPageHeight(), GUI.stdOut.getViewedPageHeight()) + (GUI.getLayoutOptions().boxed ? 2 : 0) + actionPage.getViewedPageHeight() + 1;
+  actionsStartPosition.y = Math.max(p.getViewedPageHeight(), GUI.stdOut.getViewedPageHeight()) + (GUI.getLayoutOptions().boxed ? 2 : 0) + actionPage.getViewedPageHeight() - 1;
   updateButtons();
 
   pages.push(actionPage);
 
   GUI.setPages(pages, [GUI.applicationTitle, "LOGS", "WATCHS", "ACTIONS"]);
+};
+
+const resetTest = () => {
+  if (testMode) {
+    // Reset the test
+    tests[selectedTest]?.actions.forEach((action) => {
+      writeCommand(action.modbus, 0);
+    });
+  }
+};
+      
+const defineDefaultButton = () => {
+  const title = `Reset Test [Ctrl+r]`
+  defaultButton = new Button(
+    "resetTest",
+    title,
+    title.length + 2,
+    3,
+    3,
+    actionsStartPosition.y + 10,
+    {
+      color: "red",
+      borderColor: "rgba(255, 128, 0)",
+    },
+    {
+      name: "r",
+      ctrl: true,
+    },
+    () => { }, // onClick callback
+    () => { }, // onRelease callback
+    true,
+    true,
+    false
+  );
+  defaultButton.on("click", () => {
+    resetTest();
+  });
+}
+
+const deleteButtons = () => {
+  defaultButton.delete();
+  //defaultButton = undefined;
+  actionsButtons.forEach((button) => {
+    button.delete();
+  });
+  actionsButtons = [];
 };
 
 const updateButtons = (define = false) => {
@@ -566,8 +613,8 @@ const updateButtons = (define = false) => {
           name: action.key,
           ctrl: true,
         },
-        () => {}, // onClick callback
-        () => {}, // onRelease callback
+        () => { }, // onClick callback
+        () => { }, // onRelease callback
         true,
         true,
         false
@@ -582,6 +629,7 @@ const updateButtons = (define = false) => {
       button.absoluteValues.x = actionsStartPosition.x;
       button.absoluteValues.y = actionsStartPosition.y + (index * 3);
     });
+    defaultButton.absoluteValues.y = actionsStartPosition.y + 10;
   }
 }
 
@@ -600,6 +648,7 @@ GUI.on("keypressed", (key) => {
       runProgressive = false;
       run = false;
       runRead = false;
+      deleteButtons();
       GUI.setLayoutOptions({ ...GUI.getLayoutOptions(), type: "double" });
       GUI.warn(`Test mode disabled!`);
       drawGui();
@@ -615,6 +664,8 @@ GUI.on("keypressed", (key) => {
         Object.keys(glideStorage.timers).forEach((timer) => {
           clearInterval(glideStorage.timers[timer]);
         });
+        defineDefaultButton();
+        updateButtons(true);
         GUI.warn(`Test mode enabled!`);
         drawGui();
         break;
