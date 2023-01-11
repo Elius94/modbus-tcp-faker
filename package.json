@@ -1,6 +1,6 @@
 {
     "name": "modbus-tcp-faker",
-    "version": "2.0.0",
+    "version": "3.0.0",
     "description": "Modbus TCP PLC Simulator - LCS Unit",
     "type": "module",
     "main": "index.js",
