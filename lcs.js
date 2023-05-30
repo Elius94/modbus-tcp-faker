@@ -118,9 +118,9 @@ const tests = {
         actions: [
             startEngine,
             {
-                name: "Set 'SEA WATER PRESSURE (PUMP DISCHARGE)' to 2.0",
+                name: "Set 'SEA WATER PRESSURE (PUMP DISCHARGE)' to 0.5",
                 modbus: "SEA WATER PRESSURE (PUMP DISCHARGE)",
-                value: 20,
+                value: 5,
                 color: "yellow",
                 key: "s"
             },
@@ -142,9 +142,9 @@ const tests = {
         actions: [
             startEngine,
             {
-                name: "Set 'JACKET WATER TEMPERATURE (BANKS EXIT)' to 80",
+                name: "Set 'JACKET WATER TEMPERATURE (BANKS EXIT)' to 95",
                 modbus: "JACKET WATER TEMPERATURE (BANKS EXIT)",
-                value: 80,
+                value: 950,
                 color: "yellow",
                 key: "s"
             },
@@ -166,9 +166,9 @@ const tests = {
         actions: [
             startEngine,
             {
-                name: "Set 'CHARGE AIR PRESSURE (LEFT INTERCOOLER EXIT)' to 8.5",
+                name: "Set 'CHARGE AIR PRESSURE (LEFT INTERCOOLER EXIT)' to 2.5",
                 modbus: "CHARGE AIR PRESSURE (LEFT INTERCOOLER EXIT)",
-                value: 85,
+                value: 25,
                 color: "yellow",
                 key: "s"
             },
@@ -180,9 +180,9 @@ const tests = {
                 key: "d"
             },
             {
-                name: "Set 'CHARGE AIR PRESSURE (RIGHT INTERCOOLER EXIT)' to 8.5",
+                name: "Set 'CHARGE AIR PRESSURE (RIGHT INTERCOOLER EXIT)' to 2.5",
                 modbus: "CHARGE AIR PRESSURE (RIGHT INTERCOOLER EXIT)",
-                value: 85,
+                value: 25,
                 color: "yellow",
                 key: "s"
             },
@@ -249,9 +249,9 @@ const tests = {
         actions: [
             startEngine,
             {
-                name: "Set 'JACKET WATER PRESSURE (PUMP DISCHARGE) ' to 8.6",
+                name: "Set 'JACKET WATER PRESSURE (PUMP DISCHARGE) ' to 5",
                 modbus: "JACKET WATER PRESSURE (PUMP DISCHARGE) ",
-                value: 86,
+                value: 50,
                 color: "yellow",
                 key: "s"
             },
@@ -292,11 +292,18 @@ const tests = {
         ],
         actions: [
             {
-                name: "Set 'RAIL PRESSURE' to 8.5",
+                name: "Set 'RAIL PRESSURE' to 1650 bar",
                 modbus: "RAIL PRESSURE",
-                value: 85,
+                value: 16500,
                 color: "yellow",
                 key: "a"
+            },
+            {
+                name: "Set 'RAIL PRESSURE' to 1750 bar",
+                modbus: "RAIL PRESSURE",
+                value: 17500,
+                color: "red",
+                key: "q"
             },
             {
                 name: "HIGH RAIL PRESSURE ",
@@ -330,9 +337,9 @@ const tests = {
         actions: [
             startEngine,
             {
-                name: "Set 'LUB OIL PRESSURE (ENGINE INLET)' to 1.7",
+                name: "Set 'LUB OIL PRESSURE (ENGINE INLET)' to 2.0",
                 modbus: "LUB OIL PRESSURE (ENGINE INLET)",
-                value: 17,
+                value: 20,
                 color: "yellow",
                 key: "s"
             },
@@ -368,11 +375,18 @@ const tests = {
         actions: [
             startEngine,
             {
+                name: "Set 'LUB OIL TEMPERATURE (ENGINE INLET)' to 110",
+                modbus: "LUB OIL TEMPERATURE (ENGINE INLET)",
+                value: 1100,
+                color: "yellow",
+                key: "s"
+            },
+            {
                 name: "Set 'LUB OIL TEMPERATURE (ENGINE INLET)' to 120",
                 modbus: "LUB OIL TEMPERATURE (ENGINE INLET)",
                 value: 1200,
-                color: "yellow",
-                key: "s"
+                color: "red",
+                key: "q"
             },
             {
                 name: "HIGH LUB OIL TEMPERATURE",
@@ -382,8 +396,8 @@ const tests = {
                 key: "d"
             },
             {
-                name: "VERY LOW LUB OIL PRESSURE",
-                modbus: "VERY LOW LUB OIL PRESSURE",
+                name: "VERY LOW LUB OIL TEMPERATURE",
+                modbus: "VERY LOW LUB OIL TEMPERATURE",
                 value: 1,
                 color: "red",
                 key: "f"
@@ -453,7 +467,7 @@ const tests = {
             startEngine,
         ]
     },
-    "VH Exhaust Temp Shutdown Left Turbo Intake": {
+    "VH Exhaust Temp Shutdown Left/Right Turbo Intake": {
         number: 116,
         watchs: [
             ...defaultWatchs,
@@ -462,16 +476,30 @@ const tests = {
         actions: [
             startEngine,
             {
-                name: "Set 'EXHAUST TEMP. MANIFOLD A1/2 (LEFT TURBINE INTAKE)' to 120",
+                name: "Set 'EXHAUST TEMP. MANIFOLD A1/2 (LEFT TURBINE INTAKE)' to 700",
                 modbus: "EXHAUST TEMP. MANIFOLD A1/2 (LEFT TURBINE INTAKE)",
-                value: 1200,
+                value: 7000,
                 color: "green",
                 key: "s"
             },
             {
-                name: "Set 'EXHAUST TEMP. MANIFOLD A3/4 (LEFT TURBINE INTAKE)' to 120",
+                name: "Set 'EXHAUST TEMP. MANIFOLD A3/4 (LEFT TURBINE INTAKE)' to 700",
                 modbus: "EXHAUST TEMP. MANIFOLD A3/4 (LEFT TURBINE INTAKE)",
-                value: 1200,
+                value: 7000,
+                color: "green",
+                key: "d"
+            },
+            {
+                name: "Set 'EXHAUST TEMP. MANIFOLD A1/2 (LEFT TURBINE INTAKE)' to 750",
+                modbus: "EXHAUST TEMP. MANIFOLD A1/2 (LEFT TURBINE INTAKE)",
+                value: 7500,
+                color: "green",
+                key: "s"
+            },
+            {
+                name: "Set 'EXHAUST TEMP. MANIFOLD A3/4 (LEFT TURBINE INTAKE)' to 750",
+                modbus: "EXHAUST TEMP. MANIFOLD A3/4 (LEFT TURBINE INTAKE)",
+                value: 7500,
                 color: "green",
                 key: "d"
             },
@@ -483,40 +511,30 @@ const tests = {
                 key: "f"
             },
             {
-                name: "LOAD DISCONNECTION REQUEST",
-                modbus: "LOAD DISCONNECTION REQUEST",
-                value: 1,
-                color: "white",
-                key: "g"
-            },
-            {
-                name: "EMERGENCY SHUTDOWN ",
-                modbus: "EMERGENCY SHUTDOWN ",
-                value: 1,
-                color: "red",
-                key: "h"
-            },
-        ]
-    },
-    "VH Exhaust Temp Shutdown Right Turbo Intake": {
-        number: 116,
-        watchs: [
-            ...defaultWatchs,
-            ...defaultEngineWatchs,
-        ],
-        actions: [
-            startEngine,
-            {
-                name: "Set 'EXHAUST TEMP. MANIFOLD B1/3 (RIGHT TURBINE INTAKE)' to 120",
+                name: "Set 'EXHAUST TEMP. MANIFOLD B1/3 (RIGHT TURBINE INTAKE)' to 700",
                 modbus: "EXHAUST TEMP. MANIFOLD B1/3 (RIGHT TURBINE INTAKE)",
-                value: 1200,
+                value: 7000,
                 color: "green",
                 key: "s"
             },
             {
-                name: "Set 'EXHAUST TEMP. MANIFOLD B2/4 (RIGHT TURBINE INTAKE)' to 120",
+                name: "Set 'EXHAUST TEMP. MANIFOLD B2/4 (RIGHT TURBINE INTAKE)' to 700",
                 modbus: "EXHAUST TEMP. MANIFOLD B2/4 (RIGHT TURBINE INTAKE)",
-                value: 1200,
+                value: 7000,
+                color: "green",
+                key: "d"
+            },
+            {
+                name: "Set 'EXHAUST TEMP. MANIFOLD B1/3 (RIGHT TURBINE INTAKE)' to 750",
+                modbus: "EXHAUST TEMP. MANIFOLD B1/3 (RIGHT TURBINE INTAKE)",
+                value: 7500,
+                color: "green",
+                key: "s"
+            },
+            {
+                name: "Set 'EXHAUST TEMP. MANIFOLD B2/4 (RIGHT TURBINE INTAKE)' to 750",
+                modbus: "EXHAUST TEMP. MANIFOLD B2/4 (RIGHT TURBINE INTAKE)",
+                value: 7500,
                 color: "green",
                 key: "d"
             },
@@ -552,25 +570,11 @@ const tests = {
         actions: [
             startEngine,
             {
-                name: "LOAD DISCONNECTION REQUEST",
-                modbus: "LOAD DISCONNECTION REQUEST",
-                value: 1,
-                color: "white",
-                key: "s"
-            },
-            {
                 name: "EMERGENCY SHUTDOWN (RED BUTTON)",
                 modbus: "EMERGENCY SHUTDOWN ",
                 value: 1,
                 color: "red",
                 key: "d"
-            },
-            {
-                name: "EMERGENCY SHUTDOWN (Signal)",
-                modbus: "EMERGENCY SHUTDOWN",
-                value: 1,
-                color: "rgb(255, 128, 0)",
-                key: "f"
             },
             {
                 name: "Stop Engine",
@@ -593,6 +597,13 @@ const tests = {
         ],
         actions: [
             startEngine,
+            {
+                name: "LOAD DISCONNECTION REQUEST",
+                modbus: "LOAD DISCONNECTION REQUEST",
+                value: 1,
+                color: "white",
+                key: "s"
+            },
             {
                 name: "EMERGENCY SHUTDOWN ",
                 modbus: "EMERGENCY SHUTDOWN ",

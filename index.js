@@ -5,6 +5,7 @@ const {
   PageBuilder,
   ConfirmPopup,
   Button,
+  Box,
 } = require("console-gui-tools");
 //import { ConsoleManager, OptionPopup, InputPopup, PageBuilder, ConfirmPopup } from '../console-gui-tools/src/ConsoleGui.js'
 const GUI = new ConsoleManager({
@@ -29,7 +30,7 @@ const modbus = require("jsmodbus");
 const net = require("net");
 const fs = require("fs");
 
-const ipAddress = "192.168.0.39";
+const ipAddress = "10.0.0.20";
 //const ipAddress = '127.0.0.1';
 const port = 502;
 const unitId = 1;
@@ -46,6 +47,7 @@ let prog = 4;
 let lastErr = "";
 
 let selectedChannel = "";
+let selectedChannelOsc = "";
 let typedVal = 0;
 
 const actionsStartPosition = {
@@ -61,6 +63,30 @@ const glideStorage = {
   to: 0,
   step: 1,
   timers: {},
+};
+
+const oscillatorStorage = {};
+
+function sineWave(time, amplitude, frequency, phase) {
+  // Calculate the value of the sine wave at the given time
+  return amplitude * Math.sin(2 * Math.PI * frequency * time + phase);
+}
+
+const oscillator = (channel, offset, amplitude, period) => {
+  // Make a sine wave oscillator based on the value
+  return setInterval(() => {
+    const value = sineWave(
+      oscillatorStorage[channel].currentTime,
+      amplitude,
+      1 / (period * 10),
+      0
+    );
+    const finalValue = Math.floor(value + offset);
+    solidOnscreenValues[channel] = finalValue;
+    writeCommand(channel, finalValue, false);
+    drawGui();
+    oscillatorStorage[channel].currentTime += 10;
+  }, 10)
 };
 
 let solidOnscreenValues = {
@@ -159,9 +185,9 @@ function manageMessage(channel, value) {
   drawGui();
 }
 
-function writeCommand(command, value) {
+function writeCommand(command, value, log = true) {
   if (connected) {
-    GUI.log(`[${command}]: ${value}`);
+    if (log) GUI.log(`[${command}]: ${value}`);
     const _obj = channels.find((e) => e.name === command);
     const _addr = _obj.address;
     if (_obj.type === "bit") {
@@ -355,6 +381,9 @@ socket.on("error", (err) => {
 });
 socket.connect(options);
 
+// draw the SolidOnScreenValues Box
+const solidValuesBox = new Box()
+
 /**
  * @description Updates the console screen
  *
@@ -425,22 +454,8 @@ const updateConsole = async () => {
     );
   }
 
-  // Print solid Messages to show in the console (solidOnscreenValues)
-  p.addSpacer();
-  if (Object.keys(solidOnscreenValues).length > 0) {
-    p.addRow({ text: `Solid Data: `, color: "magenta" });
-    p.addRow({
-      text: `SOLID LIFE COUNTER: ${solidOnscreenValues["SOLID LIFE COUNTER"]}`,
-      color: "white",
-    });
-    p.addRow({
-      text: `DGx HOUR CONTER LOW WORD (LLLL): ${solidOnscreenValues["DGx HOUR CONTER LOW WORD (LLLL)"]}`,
-      color: "white",
-    });
-  }
-
   // Spacer
-  p.addSpacer(2);
+  p.addSpacer(8);
   if (lastErr.length > 0) {
     p.addRow({ text: lastErr, color: "red" });
   }
@@ -490,6 +505,14 @@ const updateConsole = async () => {
       { text: `  'h'`, color: "white", bold: true },
       { text: `  - clear all glide actions`, color: "gray", italic: true }
     );
+    p.addRow(
+      { text: `  'o'`, color: "white", bold: true },
+      { text: `  - start a oscillation on channel`, color: "gray", italic: true }
+    );
+    p.addRow(
+      { text: `  '1'`, color: "white", bold: true },
+      { text: `  - manage active oscillations`, color: "gray", italic: true }
+    );
   }
   p.addRow(
     { text: `  'c'`, color: "white", bold: true },
@@ -537,7 +560,7 @@ const updateConsole = async () => {
   actionPage.addRow(
     { text: `Actions: `, color: "white", bg: "bgBlack" }
   );
-  
+
   actionsStartPosition.x = GUI.layout.layout.realWidth[1][0] + (GUI.getLayoutOptions().boxed ? 2 : 0);
   actionsStartPosition.y = Math.max(p.getViewedPageHeight(), GUI.stdOut.getViewedPageHeight()) + (GUI.getLayoutOptions().boxed ? 2 : 0) + actionPage.getViewedPageHeight() + 1;
   actionPage.addSpacer(18);
@@ -556,7 +579,7 @@ const resetTest = () => {
     });
   }
 };
-      
+
 const defineDefaultButton = () => {
   const title = `Reset Test [Ctrl+r]`
   defaultButton = new Button(
@@ -694,13 +717,13 @@ GUI.on("keypressed", (key) => {
           "popupSelectCommand",
           "Select Modbus Channel",
           channelsNames,
-          selectedChannel
+          selectedChannelOsc
         )
           .show()
-          .on("confirm", (_selectedChannel) => {
-            selectedChannel = _selectedChannel;
-            GUI.warn(`Selected: ${selectedChannel}`);
-            const _chan = channels.find((c) => c.name == selectedChannel);
+          .on("confirm", (_selectedChannelOsc) => {
+            selectedChannelOsc = _selectedChannelOsc;
+            GUI.warn(`Selected: ${selectedChannelOsc}`);
+            const _chan = channels.find((c) => c.name == selectedChannelOsc);
             if ((_chan && _chan.type === "decimal") || _chan.type === "integer") {
               typedVal = rawChannels[_chan.address];
             } else if (_chan && _chan.type == "bit") {
@@ -708,7 +731,7 @@ GUI.on("keypressed", (key) => {
             }
             new InputPopup(
               "popupTypeVal",
-              `Type value for "${selectedChannel}"`,
+              `Type value for "${selectedChannelOsc}"`,
               typedVal,
               true
             )
@@ -716,7 +739,7 @@ GUI.on("keypressed", (key) => {
               .on("confirm", (_val) => {
                 typedVal = _val;
                 GUI.warn(`NEW VALUE: ${typedVal}`);
-                writeCommand(selectedChannel, typedVal);
+                writeCommand(selectedChannelOsc, typedVal);
                 drawGui();
               });
           });
@@ -778,6 +801,115 @@ GUI.on("keypressed", (key) => {
         Object.keys(glideStorage.timers).forEach((timer) => {
           clearInterval(glideStorage.timers[timer]);
         });
+        break;
+      case "o":
+        // Sine Oscillator for a specific channel
+        new OptionPopup(
+          "popupSelectCommandOscillator",
+          "[Oscillator] Select Modbus Channel",
+          channelsNames,
+          selectedChannel
+        )
+          .show()
+          .on("confirm", (_selectedChannel) => {
+            selectedChannel = _selectedChannel;
+            GUI.warn(`Selected: ${selectedChannel}`);
+            const _chan = channels.find((c) => c.name == selectedChannel);
+            if (
+              (_chan && _chan.type === "decimal") ||
+              _chan.type === "integer"
+            ) {
+              typedVal = rawChannels[_chan.address];
+            } else if (_chan && _chan.type == "bit") {
+              new ConfirmPopup(
+                "popupNotSupported",
+                "Oscillator not supported for bit channels!"
+              ).show();
+              return;
+            }
+            oscillatorStorage[selectedChannel] = {
+              offset: 0,
+              amplitude: 0,
+              period: 1000,
+              currentTime: 0,
+              timer: null,
+            }
+            new InputPopup(
+              "popupTypeValFrom",
+              `Type offset value for "${selectedChannel}"`,
+              oscillatorStorage[selectedChannel].offset,
+              true
+            )
+              .show()
+              .on("confirm", (_val) => {
+                oscillatorStorage[selectedChannel].offset = _val;
+                GUI.warn(`OFFSET: ${oscillatorStorage[selectedChannel].offset}`);
+                new InputPopup(
+                  "popupTypeValTo",
+                  `Type amplitude value for "${selectedChannel}"`,
+                  oscillatorStorage[selectedChannel].amplitude,
+                  true
+                )
+                  .show()
+                  .on("confirm", (_val) => {
+                    oscillatorStorage[selectedChannel].amplitude = _val;
+                    GUI.warn(`AMPLITUDE: ${oscillatorStorage[selectedChannel].amplitude}`);
+                    new InputPopup(
+                      "popupTypeValPeriod",
+                      `Type period value for "${selectedChannel}"`,
+                      oscillatorStorage[selectedChannel].period,
+                      true
+                    )
+                      .show()
+                      .on("confirm", (_val) => {
+                        oscillatorStorage[selectedChannel].period = _val;
+                        GUI.warn(`PERIOD: ${oscillatorStorage[selectedChannel].period}`);
+                        if (oscillatorStorage[selectedChannel]) {
+                          clearInterval(oscillatorStorage[selectedChannel].timers);
+                        }
+                        oscillatorStorage[selectedChannel].timer = oscillator(
+                          selectedChannel,
+                          oscillatorStorage[selectedChannel].offset,
+                          oscillatorStorage[selectedChannel].amplitude,
+                          oscillatorStorage[selectedChannel].period
+                        );
+                        drawGui();
+                      });
+                  });
+              });
+          });
+        break;
+      case "1":
+        // Manage active oscillators
+        if (Object.keys(oscillatorStorage).length === 0) {
+          new ConfirmPopup(
+            "popupNoOscillators",
+            "No oscillators active!"
+          ).show();
+          return;
+        }
+        new OptionPopup(
+          "popupSelectCommandOscillator",
+          "[Oscillator] Select Modbus Channel",
+          Object.keys(oscillatorStorage),
+          selectedChannelOsc
+        )
+          .show()
+          .on("confirm", (_selectedChannel) => {
+            selectedChannelOsc = _selectedChannel;
+            GUI.warn(`Selected: ${selectedChannelOsc}`);
+            // Ask for delete
+            new ConfirmPopup(
+              "popupDeleteOscillator",
+              `Are you sure you want to delete "${selectedChannelOsc}"?`
+            )
+              .show()
+              .on("confirm", () => {
+                clearInterval(oscillatorStorage[selectedChannelOsc].timer);
+                delete oscillatorStorage[selectedChannelOsc];
+                drawGui();
+              });
+          });
         break;
       default:
         break;

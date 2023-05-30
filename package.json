@@ -14,7 +14,7 @@
     "license": "ISC",
     "dependencies": {
         "chalk": "^5.2.0",
-        "console-gui-tools": "^2.5.0",
+        "console-gui-tools": "^2.6.0",
         "jsmodbus": "^4.0.6",
         "lodash": "^4.17.21",
         "modbus": "^1.1.1"
