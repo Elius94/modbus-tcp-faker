@@ -6,6 +6,7 @@ const {
   ConfirmPopup,
   Button,
   Box,
+  InPageWidgetBuilder,
 } = require("console-gui-tools");
 //import { ConsoleManager, OptionPopup, InputPopup, PageBuilder, ConfirmPopup } from '../console-gui-tools/src/ConsoleGui.js'
 const GUI = new ConsoleManager({
@@ -46,8 +47,8 @@ let runRead = false;
 let prog = 4;
 let lastErr = "";
 
-let selectedChannel = "";
-let selectedChannelOsc = "";
+let selectedChannel = "_";
+let selectedChannelOsc = "_";
 let typedVal = 0;
 
 const actionsStartPosition = {
@@ -382,7 +383,19 @@ socket.on("error", (err) => {
 socket.connect(options);
 
 // draw the SolidOnScreenValues Box
-const solidValuesBox = new Box()
+const SolidValuesBox = new Box({
+  id: "solidValuesBox",
+  x: 2,
+  y: 8,
+  width: 60,
+  height: 8,
+  style: {
+    boxed: true,
+    color: "rgb(191, 64, 191)",
+    label: "Solid Registers"
+  },
+  draggable: false,
+});
 
 /**
  * @description Updates the console screen
@@ -525,6 +538,15 @@ const updateConsole = async () => {
 
   p.addSpacer(2);
 
+  const solidValuesPage = new InPageWidgetBuilder()
+  for (let v in solidOnscreenValues) {
+    solidValuesPage.addRow(
+      { text: `${v}: `, color: "white", bg: "bgBlack" },
+      { text: `${solidOnscreenValues[v]}`, color: "white", bg: "bgBlack" }
+    );
+  }
+  SolidValuesBox.setContent(solidValuesPage);
+
 
   if (!testMode) {
     GUI.setPage(p, 0);
@@ -582,27 +604,24 @@ const resetTest = () => {
 
 const defineDefaultButton = () => {
   const title = `Reset Test [Ctrl+r]`
-  defaultButton = new Button(
-    "resetTest",
-    title,
-    title.length + 2,
-    3,
-    3,
-    actionsStartPosition.y + 10,
-    {
+  defaultButton = new Button({
+    id: "resetTest",
+    text: title,
+    width: title.length + 2,
+    height: 3,
+    x: 3,
+    y: actionsStartPosition.y + 10,
+    style: {
       color: "red",
       borderColor: "rgba(255, 128, 0)",
     },
-    {
+    key: {
       name: "r",
       ctrl: true,
     },
-    () => { }, // onClick callback
-    () => { }, // onRelease callback
-    true,
-    true,
-    false
-  );
+    visible: true,
+    draggable: false
+  });
   defaultButton.on("click", () => {
     resetTest();
   });
@@ -629,27 +648,24 @@ const updateButtons = (define = false) => {
     defineDefaultButton();
     actionsButtons = actions.map((action, index) => {
       const title = `${action.name} [Ctrl+${action.key}]`
-      const button = new Button(
-        `action_${index}`,
-        title,
-        title.length + 2,
-        3,
-        actionsStartPosition.x,
-        actionsStartPosition.y + (index * 3),
-        {
+      const button = new Button({
+        id: `action_${index}`,
+        text: title,
+        width: title.length + 2,
+        height: 3,
+        x: actionsStartPosition.x,
+        y: actionsStartPosition.y + (index * 3),
+        style: {
           color: action.color,
           borderColor: action.color,
         },
-        {
+        key: {
           name: action.key,
           ctrl: true,
         },
-        () => { }, // onClick callback
-        () => { }, // onRelease callback
-        true,
-        true,
-        false
-      );
+        visible: true,
+        draggable: false
+      });
       button.on("click", () => {
         writeCommand(action.modbus, action.value);
       });
@@ -713,12 +729,12 @@ GUI.on("keypressed", (key) => {
         drawGui();
         break;
       case "s":
-        new OptionPopup(
-          "popupSelectCommand",
-          "Select Modbus Channel",
-          channelsNames,
-          selectedChannelOsc
-        )
+        new OptionPopup({
+          id: "popupSelectCommand",
+          title: "Select Modbus Channel",
+          options: channelsNames,
+          selected: selectedChannel,
+        })
           .show()
           .on("confirm", (_selectedChannelOsc) => {
             selectedChannelOsc = _selectedChannelOsc;
@@ -729,12 +745,12 @@ GUI.on("keypressed", (key) => {
             } else if (_chan && _chan.type == "bit") {
               typedVal = getSingleBit(rawChannels[_chan.address], _chan.offset);
             }
-            new InputPopup(
-              "popupTypeVal",
-              `Type value for "${selectedChannelOsc}"`,
-              typedVal,
-              true
-            )
+            new InputPopup({
+              id: "popupTypeVal",
+              title: `Type value for "${selectedChannelOsc}"`,
+              value: typedVal,
+              numeric: true
+            })
               .show()
               .on("confirm", (_val) => {
                 typedVal = _val;
@@ -746,12 +762,12 @@ GUI.on("keypressed", (key) => {
         break;
       case "g":
         {
-          new OptionPopup(
-            "popupSelectCommandGlide",
-            "[Glide] Select Modbus Channel",
-            channelsNames,
-            selectedChannel
-          )
+          new OptionPopup({
+            id: "popupSelectCommandGlide",
+            title: "[Glide] Select Modbus Channel",
+            options: channelsNames,
+            selected: selectedChannel,
+          })
             .show()
             .on("confirm", (_selectedChannel) => {
               selectedChannel = _selectedChannel;
@@ -765,22 +781,22 @@ GUI.on("keypressed", (key) => {
               } else if (_chan && _chan.type == "bit") {
                 typedVal = getSingleBit(rawChannels[_chan.address], _chan.offset);
               }
-              new InputPopup(
-                "popupTypeValFrom",
-                `Type start value for "${selectedChannel}"`,
-                glideStorage.from,
-                true
-              )
+              new InputPopup({
+                id: "popupTypeValFrom",
+                title: `Type start value for "${selectedChannel}"`,
+                value: glideStorage.from,
+                numeric: true
+              })
                 .show()
                 .on("confirm", (_val) => {
                   glideStorage.from = _val;
                   GUI.warn(`FROM: ${glideStorage.from}`);
-                  new InputPopup(
-                    "popupTypeValTo",
-                    `Type target value for "${selectedChannel}"`,
-                    glideStorage.to,
-                    true
-                  )
+                  new InputPopup({
+                    id: "popupTypeValTo",
+                    title: `Type target value for "${selectedChannel}"`,
+                    value: glideStorage.to,
+                    numeric: true
+                  })
                     .show()
                     .on("confirm", (_val) => {
                       glideStorage.to = _val;
@@ -804,12 +820,12 @@ GUI.on("keypressed", (key) => {
         break;
       case "o":
         // Sine Oscillator for a specific channel
-        new OptionPopup(
-          "popupSelectCommandOscillator",
-          "[Oscillator] Select Modbus Channel",
-          channelsNames,
-          selectedChannel
-        )
+        new OptionPopup({
+          id: "popupSelectCommandOscillator",
+          title: "[Oscillator] Select Modbus Channel",
+          options: channelsNames,
+          selected: selectedChannelOsc
+        })
           .show()
           .on("confirm", (_selectedChannel) => {
             selectedChannel = _selectedChannel;
@@ -821,10 +837,10 @@ GUI.on("keypressed", (key) => {
             ) {
               typedVal = rawChannels[_chan.address];
             } else if (_chan && _chan.type == "bit") {
-              new ConfirmPopup(
-                "popupNotSupported",
-                "Oscillator not supported for bit channels!"
-              ).show();
+              new ConfirmPopup({
+                id: "popupNotSupported",
+                title: "Oscillator not supported for bit channels!"
+              }).show();
               return;
             }
             oscillatorStorage[selectedChannel] = {
@@ -834,32 +850,32 @@ GUI.on("keypressed", (key) => {
               currentTime: 0,
               timer: null,
             }
-            new InputPopup(
-              "popupTypeValFrom",
-              `Type offset value for "${selectedChannel}"`,
-              oscillatorStorage[selectedChannel].offset,
-              true
-            )
+            new InputPopup({
+              id: "popupTypeValFrom",
+              title: `Type offset value for "${selectedChannel}"`,
+              value: oscillatorStorage[selectedChannel].offset,
+              numeric: true
+            })
               .show()
               .on("confirm", (_val) => {
                 oscillatorStorage[selectedChannel].offset = _val;
                 GUI.warn(`OFFSET: ${oscillatorStorage[selectedChannel].offset}`);
-                new InputPopup(
-                  "popupTypeValTo",
-                  `Type amplitude value for "${selectedChannel}"`,
-                  oscillatorStorage[selectedChannel].amplitude,
-                  true
-                )
+                new InputPopup({
+                  id: "popupTypeValTo",
+                  title: `Type amplitude value for "${selectedChannel}"`,
+                  value: oscillatorStorage[selectedChannel].amplitude,
+                  numeric: true
+                })
                   .show()
                   .on("confirm", (_val) => {
                     oscillatorStorage[selectedChannel].amplitude = _val;
                     GUI.warn(`AMPLITUDE: ${oscillatorStorage[selectedChannel].amplitude}`);
-                    new InputPopup(
-                      "popupTypeValPeriod",
-                      `Type period value for "${selectedChannel}"`,
-                      oscillatorStorage[selectedChannel].period,
-                      true
-                    )
+                    new InputPopup({
+                      id: "popupTypeValPeriod",
+                      title: `Type period value for "${selectedChannel}"`,
+                      value: oscillatorStorage[selectedChannel].period,
+                      numeric: true
+                    })
                       .show()
                       .on("confirm", (_val) => {
                         oscillatorStorage[selectedChannel].period = _val;
@@ -882,27 +898,27 @@ GUI.on("keypressed", (key) => {
       case "1":
         // Manage active oscillators
         if (Object.keys(oscillatorStorage).length === 0) {
-          new ConfirmPopup(
-            "popupNoOscillators",
-            "No oscillators active!"
-          ).show();
+          new ConfirmPopup({
+            id: "popupNoOscillators",
+            title: "No oscillators active!"
+          }).show();
           return;
         }
-        new OptionPopup(
-          "popupSelectCommandOscillator",
-          "[Oscillator] Select Modbus Channel",
-          Object.keys(oscillatorStorage),
-          selectedChannelOsc
-        )
+        new OptionPopup({
+          id: "popupSelectCommandOscillator",
+          title: "[Oscillator] Select Modbus Channel",
+          options: Object.keys(oscillatorStorage),
+          selected: selectedChannelOsc
+        })
           .show()
           .on("confirm", (_selectedChannel) => {
             selectedChannelOsc = _selectedChannel;
             GUI.warn(`Selected: ${selectedChannelOsc}`);
             // Ask for delete
-            new ConfirmPopup(
-              "popupDeleteOscillator",
-              `Are you sure you want to delete "${selectedChannelOsc}"?`
-            )
+            new ConfirmPopup({
+              id: "popupDeleteOscillator",
+              title: `Are you sure you want to delete "${selectedChannelOsc}"?`
+            })
               .show()
               .on("confirm", () => {
                 clearInterval(oscillatorStorage[selectedChannelOsc].timer);
@@ -926,7 +942,7 @@ GUI.on("keypressed", (key) => {
       }
       break;
     case "q":
-      new ConfirmPopup("popupQuit", "Are you sure you want to quit?")
+      new ConfirmPopup({ id: "popupQuit", title: "Are you sure you want to quit?" })
         .show()
         .on("confirm", () => closeApp());
       break;
