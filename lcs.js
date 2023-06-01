@@ -28,6 +28,14 @@ const startEngine = {
     key: "a"
 }
 
+const stopEngine = {
+    name: "Set Engine Speed to 0",
+    modbus: "ENGINE SPEED",
+    value: 0,
+    color: "red",
+    key: "a"
+}
+
 const tests = {
     "High Crankcase Pressure Alarm": {
         number: 101,
@@ -70,9 +78,9 @@ const tests = {
         actions: [
             startEngine,
             {
-                name: "Set 'FUEL PRESSURE (AFTER FILTER)' to 2.5",
+                name: "Set 'FUEL PRESSURE (AFTER FILTER)' to 4.0",
                 modbus: "FUEL PRESSURE (AFTER FILTER)",
-                value: 25,
+                value: 40,
                 color: "yellow",
                 key: "s"
             },
@@ -204,9 +212,9 @@ const tests = {
         actions: [
             startEngine,
             {
-                name: "Set 'PISTON COOLING OIL PRESSURE (FILTER INLET)' to 1.7",
+                name: "Set 'PISTON COOLING OIL PRESSURE (FILTER INLET)' to 3.2",
                 modbus: "PISTON COOLING OIL PRESSURE (FILTER INLET)",
-                value: 17,
+                value: 32,
                 color: "yellow",
                 key: "s"
             },
@@ -478,28 +486,28 @@ const tests = {
             {
                 name: "Set 'EXHAUST TEMP. MANIFOLD A1/2 (LEFT TURBINE INTAKE)' to 700",
                 modbus: "EXHAUST TEMP. MANIFOLD A1/2 (LEFT TURBINE INTAKE)",
-                value: 7000,
+                value: 700,
                 color: "green",
                 key: "s"
             },
             {
                 name: "Set 'EXHAUST TEMP. MANIFOLD A3/4 (LEFT TURBINE INTAKE)' to 700",
                 modbus: "EXHAUST TEMP. MANIFOLD A3/4 (LEFT TURBINE INTAKE)",
-                value: 7000,
+                value: 700,
                 color: "green",
                 key: "d"
             },
             {
                 name: "Set 'EXHAUST TEMP. MANIFOLD A1/2 (LEFT TURBINE INTAKE)' to 750",
                 modbus: "EXHAUST TEMP. MANIFOLD A1/2 (LEFT TURBINE INTAKE)",
-                value: 7500,
+                value: 750,
                 color: "green",
                 key: "s"
             },
             {
                 name: "Set 'EXHAUST TEMP. MANIFOLD A3/4 (LEFT TURBINE INTAKE)' to 750",
                 modbus: "EXHAUST TEMP. MANIFOLD A3/4 (LEFT TURBINE INTAKE)",
-                value: 7500,
+                value: 750,
                 color: "green",
                 key: "d"
             },
@@ -513,28 +521,28 @@ const tests = {
             {
                 name: "Set 'EXHAUST TEMP. MANIFOLD B1/3 (RIGHT TURBINE INTAKE)' to 700",
                 modbus: "EXHAUST TEMP. MANIFOLD B1/3 (RIGHT TURBINE INTAKE)",
-                value: 7000,
+                value: 700,
                 color: "green",
                 key: "s"
             },
             {
                 name: "Set 'EXHAUST TEMP. MANIFOLD B2/4 (RIGHT TURBINE INTAKE)' to 700",
                 modbus: "EXHAUST TEMP. MANIFOLD B2/4 (RIGHT TURBINE INTAKE)",
-                value: 7000,
+                value: 700,
                 color: "green",
                 key: "d"
             },
             {
                 name: "Set 'EXHAUST TEMP. MANIFOLD B1/3 (RIGHT TURBINE INTAKE)' to 750",
                 modbus: "EXHAUST TEMP. MANIFOLD B1/3 (RIGHT TURBINE INTAKE)",
-                value: 7500,
+                value: 750,
                 color: "green",
                 key: "s"
             },
             {
                 name: "Set 'EXHAUST TEMP. MANIFOLD B2/4 (RIGHT TURBINE INTAKE)' to 750",
                 modbus: "EXHAUST TEMP. MANIFOLD B2/4 (RIGHT TURBINE INTAKE)",
-                value: 7500,
+                value: 750,
                 color: "green",
                 key: "d"
             },
@@ -570,13 +578,6 @@ const tests = {
         actions: [
             startEngine,
             {
-                name: "EMERGENCY SHUTDOWN (RED BUTTON)",
-                modbus: "EMERGENCY SHUTDOWN ",
-                value: 1,
-                color: "red",
-                key: "d"
-            },
-            {
                 name: "Stop Engine",
                 modbus: "ENGINE SPEED",
                 value: 0,
@@ -597,6 +598,7 @@ const tests = {
         ],
         actions: [
             startEngine,
+            stopEngine,
             {
                 name: "LOAD DISCONNECTION REQUEST",
                 modbus: "LOAD DISCONNECTION REQUEST",
@@ -625,6 +627,7 @@ const tests = {
         ],
         actions: [
             startEngine,
+            stopEngine,
             {
                 name: "LOAD DISCONNECTION REQUEST",
                 modbus: "LOAD DISCONNECTION REQUEST",
